@@ -14,11 +14,14 @@ public:
 	~ConfigureGuide();
 
 private:
-	Ui::ConfigureGuide ui;
-	void ProtocolSwitch();
-	void GetCertPath();
+    Ui::ConfigureGuide ui;
+    void ProtocolSwitch();
+    void GetCertPath();
     void SetConfigure(void *);
     void localIdCheck();
+    void localIpCheck();
+    void localPwdCheck();
+    void LineEditChange();
     int CheackLen(QString sttr);
 };
 

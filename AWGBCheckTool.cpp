@@ -20,7 +20,7 @@ inline QString chooseModeType(int i)
 {
     switch (i) {
     case 0: return "IPC";
-    case 1: return "NVR";
+    case 1: return "NVR/DVR";
     case 2: return "解码器";
     case 3: return "上级平台";
     case 4: return "下级平台";
@@ -31,7 +31,7 @@ inline int mode2Int(QString s)
 {
     if(s == "IPC")
         return 0;
-    if(s == "NVR")
+    if(s == "NVR/DVR")
         return 1;
     if(s == "解码器")
         return 2;
@@ -52,13 +52,6 @@ inline int proto2Int(QString s)
         return -1;
 }
 
-inline QString chooseProtoType(int i)
-{
-    switch (i) {
-    case 0: return "35114";
-    case 1: return "28181";
-    }
-}
 
 inline QString chooseAuthMode(int i)
 {
@@ -82,7 +75,7 @@ void AWGBCheckTool::SetList(pGBStart_s param)
     student_model->setHorizontalHeaderItem(8, new QStandardItem(QObject::tr("心跳次数")));
     QComboBox *comboBox = new QComboBox();
     comboBox->addItem("IPC");
-    comboBox->addItem("NVR");
+    comboBox->addItem("NVR/DVR");
     //student_model->setItem(0, 1, QStandardItem(comboBox));
     if (param->protoType == 0){
         student_model->setHorizontalHeaderItem(9, new QStandardItem(QObject::tr("文件路径")));
@@ -129,9 +122,25 @@ int reverseModeType(QString s)
     {
         return 0;
     }
-    if(s == QString("NVR"))
+    if(s == QString("NVR/DVR"))
     {
         return 1;
+    }
+    if(s == QString("解码器"))
+    {
+        return 2;
+    }
+    if(s == QString("上级平台"))
+    {
+        return 3;
+    }
+    if(s == QString("下级平台"))
+    {
+        return 4;
+    }
+    else
+    {
+        return -1;
     }
 }
 

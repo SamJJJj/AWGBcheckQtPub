@@ -121,7 +121,7 @@
             </item>
             <item>
              <property name="text">
-              <string>NVR</string>
+              <string>NVR/DVR</string>
              </property>
             </item>
             <item>
@@ -177,6 +177,19 @@
         <item>
          <widget class="QWidget" name="widget_6" native="true">
           <layout class="QGridLayout" name="gridLayout_6">
+           <item row="0" column="0">
+            <spacer name="VerticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
            <item row="1" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout_21" stretch="20,20">
              <property name="spacing">
@@ -228,7 +241,7 @@
                  </item>
                  <item>
                   <property name="text">
-                   <string>GB28181</string>
+                   <string>GB/T28181</string>
                   </property>
                  </item>
                 </widget>
@@ -262,7 +275,7 @@
               </layout>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_23" stretch="1,5,1,20,1">
+              <layout class="QHBoxLayout" name="horizontalLayout_23" stretch="0">
                <property name="spacing">
                 <number>0</number>
                </property>
@@ -276,81 +289,51 @@
                 <number>0</number>
                </property>
                <item>
-                <spacer name="HorizontalSpacer_8">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                <widget class="QStackedWidget" name="stackedWidget_1">
+                 <property name="currentIndex">
+                  <number>0</number>
                  </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QLabel" name="Label_3">
-                 <property name="text">
-                  <string>认证方式</string>
-                 </property>
+                 <widget class="QWidget" name="page_13">
+                  <widget class="QLabel" name="Label_3">
+                   <property name="geometry">
+                    <rect>
+                     <x>10</x>
+                     <y>0</y>
+                     <width>71</width>
+                     <height>16</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>认证方式</string>
+                   </property>
+                  </widget>
+                  <widget class="QComboBox" name="authMethod">
+                   <property name="geometry">
+                    <rect>
+                     <x>180</x>
+                     <y>0</y>
+                     <width>300</width>
+                     <height>21</height>
+                    </rect>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>双向</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>单向</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </widget>
+                 <widget class="QWidget" name="page_14"/>
                 </widget>
-               </item>
-               <item>
-                <spacer name="HorizontalSpacer_9">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QComboBox" name="authMethod">
-                 <item>
-                  <property name="text">
-                   <string>双向</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>单向</string>
-                  </property>
-                 </item>
-                </widget>
-               </item>
-               <item>
-                <spacer name="HorizontalSpacer_10">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
                </item>
               </layout>
              </item>
             </layout>
-           </item>
-           <item row="0" column="0">
-            <spacer name="VerticalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
            </item>
           </layout>
          </widget>
@@ -808,7 +791,7 @@
             </spacer>
            </item>
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout_9" stretch="1,5,1,5,1,5,1,5,1">
+            <layout class="QVBoxLayout" name="verticalLayout_9" stretch="1,5,1,5,1,5,0,0,0">
              <property name="spacing">
               <number>0</number>
              </property>
@@ -1065,14 +1048,14 @@
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>20</width>
+                 <width>60</width>
                  <height>40</height>
                 </size>
                </property>
               </spacer>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="HorizontalSpacer32" stretch="1,5,1,0,1">
+              <layout class="QHBoxLayout" name="HorizontalSpacer32" stretch="1,5,0,0,1">
                <property name="spacing">
                 <number>0</number>
                </property>
@@ -1106,19 +1089,6 @@
                 </widget>
                </item>
                <item>
-                <spacer name="HorizontalSpacer_33">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
                 <widget class="QComboBox" name="charSet">
                  <item>
                   <property name="text">
@@ -1131,6 +1101,19 @@
                   </property>
                  </item>
                 </widget>
+               </item>
+               <item>
+                <spacer name="HorizontalSpacer_33">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>275</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
                <item>
                 <spacer name="HorizontalSpacer_34">
@@ -1449,5 +1432,22 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>protoType</sender>
+   <signal>editTextChanged(QString)</signal>
+   <receiver>stackedWidget_1</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>192</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>781</x>
+     <y>160</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

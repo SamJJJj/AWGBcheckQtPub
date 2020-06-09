@@ -15,7 +15,7 @@ void showThread::run()
     int i = 0;
     while(i < 30){
         IC->ui.textBrowser->append(QString("pppppppppppppppp"));
-        QApplication::processEvents();
+//        QApplication::processEvents();
         i++;
         Sleep(500);
     }
