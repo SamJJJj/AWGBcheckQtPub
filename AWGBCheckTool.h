@@ -35,7 +35,7 @@ private:
 	Ui::AWGBCheckToolClass ui;
     showThread showT;
     void SetList(pGBStart_s);
-//    void ChangeList(pGBStart_s);
+    void EndList();
 private slots:
     void dataChangedSlot(pGBStart_s);
     void ButtonCli(pGBStart_s);

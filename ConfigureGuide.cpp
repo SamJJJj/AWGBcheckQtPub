@@ -65,7 +65,6 @@ void ConfigureGuide::LineEditChange(){
 void ConfigureGuide::localIdCheck()
 {
     int length = ui.localId->text().length();
-    cout << length << endl;
     if(length == 18 || length == 20)
     {
         ;

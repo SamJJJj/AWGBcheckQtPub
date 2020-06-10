@@ -7,13 +7,16 @@
 #include <regex>
 #include <QMessageBox>
 #include <QThread>
+#include <QTextBrowser>
 using namespace std;
 AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param)
 	: QMainWindow(parent)
 {
     ui.setupUi(this);
     AWGBCheckTool::SetList(param);
+    connect(ui.textBrowser, &QTextBrowser::textChanged, this, &AWGBCheckTool::EndList);
     connect(ui.tableView_2->model(), &QStandardItemModel::dataChanged, this, [=]{AWGBCheckTool::dataChangedSlot(param);});
+
 }
 
 inline QString chooseModeType(int i)
@@ -51,7 +54,9 @@ inline int proto2Int(QString s)
     else
         return -1;
 }
-
+void AWGBCheckTool::EndList(){
+    ui.textBrowser->moveCursor(QTextCursor::End);
+}
 
 inline QString chooseAuthMode(int i)
 {
