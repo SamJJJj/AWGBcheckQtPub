@@ -39,4 +39,5 @@ private:
 private slots:
     void dataChangedSlot(pGBStart_s);
     void ButtonCli(pGBStart_s);
+    void TEST();
 };
