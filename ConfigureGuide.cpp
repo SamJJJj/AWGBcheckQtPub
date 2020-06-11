@@ -329,7 +329,7 @@ void ConfigureGuide::SetConfigure(void* param)
     ret = AW_BSQueue_PutBuffer(handle, res->localId, strlen((char*)res->path));
     cout << "put:" << ret << endl;
 
-    AWGBCheckTool *IC = new AWGBCheckTool(Q_NULLPTR, res);
+    AWGBCheckTool *IC = new AWGBCheckTool(Q_NULLPTR, res, handle);
     IC->setAttribute(Qt::WA_DeleteOnClose);
     IC->show();
     IC->showST();

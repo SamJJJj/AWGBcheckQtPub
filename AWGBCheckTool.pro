@@ -7,7 +7,7 @@
 QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-LIBS += -lpthread libwsock32 libws2_32
+LIBS += -lpthread libwsock32 libws2_32 D:\Qt\myprojects\AWGBCheckTool\libxml2.dll D:\Qt\myprojects\AWGBCheckTool\iconv.dll D:\Qt\myprojects\AWGBCheckTool\zlib1.dll
 TARGET = AWGBCheckTool
 TEMPLATE = app
 
@@ -38,7 +38,10 @@ HEADERS += \
     AWQueue.h \
     ConfigureGuide.h \
     beanstalk.h \
-    main.h
+    iconv.h \
+    main.h \
+    zconf.h \
+    zlib.h
 
 FORMS += \
         AWGBCheckTool.ui \
