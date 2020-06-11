@@ -7,7 +7,7 @@
 QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
+LIBS += -lpthread libwsock32 libws2_32
 TARGET = AWGBCheckTool
 TEMPLATE = app
 
@@ -24,6 +24,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+    AWQueue.c \
+    beanstalk.c \
         main.cpp \
         AWGBCheckTool.cpp \
     ConfigureGuide.cpp \
@@ -33,7 +35,9 @@ SOURCES += \
 
 HEADERS += \
         AWGBCheckTool.h \
+    AWQueue.h \
     ConfigureGuide.h \
+    beanstalk.h \
     main.h
 
 FORMS += \
@@ -42,3 +46,4 @@ FORMS += \
 _ConfigureGuide.ui
         
 
+INCLUDEPATH += D:\Qt\myprojects\AWGBCheckTool

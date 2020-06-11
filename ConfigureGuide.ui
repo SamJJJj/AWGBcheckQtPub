@@ -63,7 +63,7 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <layout class="QHBoxLayout" name="HorizontalLayout1" stretch="0,0,0,0,0,0,0,0,0,0,0">
+         <layout class="QHBoxLayout" name="HorizontalLayout1" stretch="0,0,0,0,0,0,0,0,0,0,0,0">
           <property name="spacing">
            <number>7</number>
           </property>
@@ -74,7 +74,7 @@
            <number>0</number>
           </property>
           <item>
-           <spacer name="HorizontalSpacer_1">
+           <spacer name="horizontalSpacer_4">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -88,9 +88,15 @@
           </item>
           <item>
            <widget class="QLabel" name="Label_1">
-            <property name="maximumSize">
+            <property name="minimumSize">
              <size>
               <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>150</width>
               <height>16777215</height>
              </size>
             </property>
@@ -98,6 +104,19 @@
              <string>测试目标类型</string>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="HorizontalSpacer_1">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>10</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <widget class="QComboBox" name="modelType">
@@ -1247,7 +1266,7 @@
            <enum>Qt::NoContextMenu</enum>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="page_3">
            <layout class="QGridLayout" name="gridLayout_4">

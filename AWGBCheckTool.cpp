@@ -24,6 +24,8 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param)
     connect(ui.pushButton_5, &QPushButton::clicked, this, &AWGBCheckTool::deviceCatalog);
     connect(ui.pushButton_23, &QPushButton::clicked, this, &AWGBCheckTool::toControlPage);
     connect(ui.pushButton_13, &QPushButton::clicked, this, &AWGBCheckTool::toListPage);
+    connect(ui.pushButton, &QPushButton::clicked, this, &AWGBCheckTool::toVideoPage);
+    connect(ui.pushButton_9, &QPushButton::clicked, this, &AWGBCheckTool::toSipPage);
 }
 
 AWGBCheckTool::~AWGBCheckTool()
@@ -420,5 +422,17 @@ void AWGBCheckTool::toControlPage()
 
 void AWGBCheckTool::toListPage()
 {
+    ui.stackedWidget_2->setCurrentIndex(1);
+}
+
+void AWGBCheckTool::toVideoPage()
+{
+    ui.stackedWidget->setCurrentIndex(1);
+    ui.stackedWidget_2->setCurrentIndex(2);
+}
+
+void AWGBCheckTool::toSipPage()
+{
+    ui.stackedWidget->setCurrentIndex(0);
     ui.stackedWidget_2->setCurrentIndex(1);
 }

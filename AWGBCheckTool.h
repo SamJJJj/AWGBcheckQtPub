@@ -80,4 +80,6 @@ private slots:
     void deviceCatalog();
     void toControlPage();
     void toListPage();
+    void toVideoPage();
+    void toSipPage();
 };
