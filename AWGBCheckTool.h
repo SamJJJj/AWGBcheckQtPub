@@ -2,10 +2,38 @@
 
 #include <QtWidgets/QMainWindow>
 #include <QThread>
+#include <QStandardItemModel>
 #include "ui_AWGBCheckTool.h"
 #include "main.h"
 
 class AWGBCheckTool;
+
+class ShowTree: public QThread
+{
+    friend class AWGBCheckTool;
+public:
+    explicit ShowTree(QObject * parent = 0);
+    ~ShowTree();
+    void setTreeView(QTreeView *);
+protected:
+    void run();
+private:
+    QTreeView * treeView;
+};
+
+class ShowCheckResThread: public QThread
+{
+    friend class AWGBCheckTool;
+public:
+    explicit ShowCheckResThread(QObject * parent = 0);
+    ~ShowCheckResThread();
+    void setTableView(QTableView *);
+protected:
+    void run();
+private:
+    QTableView *tableView;
+    QStandardItemModel *checkResModel;
+};
 
 class showThread: public QThread
 {
@@ -14,29 +42,42 @@ class showThread: public QThread
 public:
     explicit showThread(QObject * parent = 0);
     ~showThread();
-    void setIc(AWGBCheckTool * );
+    void setTextBrowser(QTextBrowser * );
 protected:
     void run();
 signals:
     void isDone();
+    void showSip();
 private:
-    AWGBCheckTool * IC;
+    QTextBrowser * browser;
 };
 
 class AWGBCheckTool : public QMainWindow
 {
     friend class showThread;
+    friend class ShowCheckResThread;
 	Q_OBJECT
 
 public:
     AWGBCheckTool(QWidget *parent = Q_NULLPTR, pGBStart_s param = Q_NULLPTR);
+    ~AWGBCheckTool();
     void showST();
+    void showTreeView();
+    void showCheckRes();
 private:
 	Ui::AWGBCheckToolClass ui;
-    showThread showT;
+    showThread *showT;
+    ShowCheckResThread *showCheckResT;
+    ShowTree *showTreeT;
     void SetList(pGBStart_s);
     void EndList();
 private slots:
-    void dataChangedSlot(pGBStart_s);
+    void dataChangedSlot();
     void ButtonCli(pGBStart_s);
+    void showInCurrentInterface();
+    void showTreeInCurrentInterface();
+    void deviceRegister();
+    void deviceCatalog();
+    void toControlPage();
+    void toListPage();
 };
