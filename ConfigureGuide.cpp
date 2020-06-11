@@ -1,5 +1,6 @@
 ﻿#include "ConfigureGuide.h"
 #include "main.h"
+#include "AWQueue.h"
 #include <qvalidator.h>
 #include <qlineedit.h>
 #include <iostream>
@@ -12,9 +13,10 @@
 
 using namespace std;
 
-ConfigureGuide::ConfigureGuide(QWidget *parent, void *param)
+ConfigureGuide::ConfigureGuide(QWidget *parent, void *param, int h)
 	: QWidget(parent)
 {
+    handle = h;
     ui.setupUi(this);
     ConfigureGuide::initConf();
     QRegExp regExp("\\d{1,16}");
@@ -322,6 +324,10 @@ void ConfigureGuide::SetConfigure(void* param)
         strcpy(res->path, path.toUtf8().data());
     }
    // free(param);    //��ʱ��������free
+
+    int ret;
+    ret = AW_BSQueue_PutBuffer(handle, res->localId, strlen((char*)res->path));
+    cout << "put:" << ret << endl;
 
     AWGBCheckTool *IC = new AWGBCheckTool(Q_NULLPTR, res);
     IC->setAttribute(Qt::WA_DeleteOnClose);

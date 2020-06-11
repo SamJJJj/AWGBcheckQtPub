@@ -1,3 +1,4 @@
+#define _WIN32_WINNT 0x600
 #include <winsock2.h>
 #include <windows.h>
 #include <string.h>
@@ -55,7 +56,7 @@ const char* bs_status_text(int code) {
 }
 
 int bs_resolve_address(const char *host, int port, struct sockaddr_in *server) {
-    char service[64];
+    char service[64] = {0};
     struct addrinfo *addr, *rec;
 
     snprintf(service, 64, "%d", port);
@@ -84,7 +85,7 @@ int bs_connect(const char *host, int port) {
     if (fd < 0 || bs_resolve_address(host, port, &server) < 0)
         return BS_STATUS_FAIL;
 
-    if (connect(fd, (struct sockaddr*)&server, sizeof(server)) != 0) {
+   if (connect(fd, (struct sockaddr*)&server, sizeof(server)) != 0) {
         closesocket(fd);
         return BS_STATUS_FAIL;
     }

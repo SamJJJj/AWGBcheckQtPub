@@ -10,11 +10,12 @@ class ConfigureGuide : public QWidget
 	Q_OBJECT
 
 public:
-	ConfigureGuide(QWidget *parent = Q_NULLPTR, void *param = NULL);
+    ConfigureGuide(QWidget *parent = Q_NULLPTR, void *param = NULL, int handle = 0);
 	~ConfigureGuide();
 
 private:
     Ui::ConfigureGuide ui;
+    int handle;
     void ProtocolSwitch();
     void GetCertPath();
     void SetConfigure(void *);

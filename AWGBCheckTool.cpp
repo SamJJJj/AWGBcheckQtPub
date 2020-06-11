@@ -8,11 +8,12 @@
 #include <QThread>
 #include <QTextBrowser>
 using namespace std;
-AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param)
+AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
 	: QMainWindow(parent)
 {
     ui.setupUi(this);
     AWGBCheckTool::SetList(param);
+    handle = h;
 //    QThread *thread = new QThread();
     showT = new showThread;
     showCheckResT = new ShowCheckResThread;
@@ -323,7 +324,7 @@ void AWGBCheckTool::showST()
 
 void AWGBCheckTool::showCheckRes()
 {
-    showCheckResT->setTableView(ui.tableView);
+    showCheckResT->setTableView(ui.tableView, handle);
     showCheckResT->start();
 }
 

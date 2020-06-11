@@ -27,12 +27,13 @@ class ShowCheckResThread: public QThread
 public:
     explicit ShowCheckResThread(QObject * parent = 0);
     ~ShowCheckResThread();
-    void setTableView(QTableView *);
+    void setTableView(QTableView *, int handle);
 protected:
     void run();
 private:
     QTableView *tableView;
     QStandardItemModel *checkResModel;
+    int handle;
 };
 
 class showThread: public QThread
@@ -59,7 +60,7 @@ class AWGBCheckTool : public QMainWindow
 	Q_OBJECT
 
 public:
-    AWGBCheckTool(QWidget *parent = Q_NULLPTR, pGBStart_s param = Q_NULLPTR);
+    AWGBCheckTool(QWidget *parent = Q_NULLPTR, pGBStart_s param = Q_NULLPTR, int handle = 0);
     ~AWGBCheckTool();
     void showST();
     void showTreeView();
@@ -69,6 +70,7 @@ private:
     showThread *showT;
     ShowCheckResThread *showCheckResT;
     ShowTree *showTreeT;
+    int handle;
     void SetList(pGBStart_s);
     void EndList();
 private slots:
