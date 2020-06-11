@@ -23,6 +23,9 @@ private:
     void localPwdCheck();
     void LineEditChange();
     int CheackLen(QString sttr);
+    void initConf();
+    void exConf();
+    void inConf();
 };
 
 void strcpy(uc * dst, char * src);

@@ -7,6 +7,8 @@
 #include <fstream>
 #include <QMessageBox>
 #include <regex>
+#include <QTextStream>
+#include <QInputDialog>
 
 using namespace std;
 
@@ -14,6 +16,7 @@ ConfigureGuide::ConfigureGuide(QWidget *parent, void *param)
 	: QWidget(parent)
 {
     ui.setupUi(this);
+    ConfigureGuide::initConf();
     QRegExp regExp("\\d{1,16}");
     QRegExp regID("\\d{1,20}");
     QRegExp regAxp("\\d{10}");
@@ -32,17 +35,139 @@ ConfigureGuide::ConfigureGuide(QWidget *parent, void *param)
     ui.LineEdit_10->setValidator(new QRegExpValidator(rxpwd, ui.LineEdit_10));
     connect(ui.localId, &QLineEdit::editingFinished, this, &ConfigureGuide::localIdCheck);
     connect(ui.localIp, &QLineEdit::editingFinished, this, &ConfigureGuide::localIpCheck);
-//    ([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])
     connect(ui.localPort, &QLineEdit::editingFinished, this, &ConfigureGuide::localPwdCheck);
     connect(ui.mediaPort, &QLineEdit::editingFinished, this, &ConfigureGuide::localPwdCheck);
-
-
     connect(ui.protoType, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ConfigureGuide::ProtocolSwitch);
-
     connect(ui.PushButton_1, &QPushButton::clicked, this, &ConfigureGuide::GetCertPath);
     connect(ui.LineEdit_9, &QLineEdit::textEdited, this, &ConfigureGuide::LineEditChange);
-
     connect(ui.startButton, &QPushButton::clicked, this, [=]{ConfigureGuide::SetConfigure(param);});
+    connect(ui.exButton, &QPushButton::clicked, this, &ConfigureGuide::exConf);
+    connect(ui.inButton, &QPushButton::clicked, this, &ConfigureGuide::inConf);
+}
+void ConfigureGuide::inConf(){
+    int in = ui.boBox_1->currentIndex();
+    QString f = ui.boBox_1->itemText(in);
+    QFile file(f+".txt");
+    file.open(( QIODevice::ReadOnly));
+    QString data;
+    data = file.readLine().data();
+    int flag;
+    if (data.length() != 0){
+        if (data.trimmed() == '0'){flag = 0;ui.protoType->setCurrentIndex(0);}
+        if (data.trimmed() == '1'){flag = 1;ui.protoType->setCurrentIndex(1);}
+    }
+    data = file.readLine().data();
+    if (data.length() != 0){
+        if (data.trimmed() == '0'){ui.modelType->setCurrentIndex(0);}
+        if (data.trimmed() == '1'){ui.modelType->setCurrentIndex(1);}
+        if (data.trimmed() == '2'){ui.modelType->setCurrentIndex(2);}
+        if (data.trimmed() == '3'){ui.modelType->setCurrentIndex(3);}
+        if (data.trimmed() == '4'){ui.modelType->setCurrentIndex(4);}
+    }
+    data = file.readLine().data();
+    ui.localId->setText(data);
+    data = file.readLine().data();
+    ui.validTime->setText(data);
+    data = file.readLine().data();
+    ui.localIp->setText(data);
+    data = file.readLine().data();
+    ui.beatTime->setText(data);
+    data = file.readLine().data();
+    ui.localPort->setText(data);
+    data = file.readLine().data();
+    ui.beatCnt->setText(data);
+    data = file.readLine().data();
+    ui.localArea->setText(data);
+    data = file.readLine().data();
+    ui.mediaPort->setText(data);
+    if (flag == 0){
+        data = file.readLine().data();
+        if (data.trimmed() == '0'){ui.authMethod->setCurrentIndex(0);}
+        if (data.trimmed() == '1'){ui.authMethod->setCurrentIndex(1);}
+        data = file.readLine().data();
+        ui.LineEdit_9->setText(data);
+    }else{
+        data = file.readLine().data();
+        ui.LineEdit_10->setText(data);
+    }
+}
+void ConfigureGuide::initConf(){
+    QFile file("list.txt");//括号内为文件路径
+    file.open(( QIODevice::ReadOnly));
+    QVector<QString> list;
+    ui.boBox_1->addItem("");
+    QString data;
+    while (data = file.readLine().data(), data.length() != 0) {
+        if(list.indexOf(data.trimmed()) == -1)
+        {
+            ui.boBox_1->addItem(data.trimmed());
+            list.push_back(data.trimmed());
+        }
+    }
+
+    file.close();
+}
+
+void prochange(int a){
+    ;
+}
+void ConfigureGuide::exConf(){
+    bool isOK;//QInputDialog 是否成功得到输入
+    QString text = QInputDialog::getText(NULL,"新建配置项","输入要保存的配置名 ",QLineEdit::Normal,"",&isOK);
+//    cout << text.toLatin1().data() << endl;
+    if (text.length()){
+        int protoType = ui.protoType->currentIndex();
+        int devType = ui.modelType->currentIndex();
+        QFile file("list.txt");//括号内为文件路径
+        file.open(( QIODevice::Append));
+        file.write(text.toLatin1().data());
+        file.write("\r\n");
+        file.close();
+        QFile file2(text+".txt");//括号内为文件路径
+        file2.open(( QIODevice::WriteOnly));
+        file2.write(QString::number(protoType).toLatin1().data());
+        file2.write("\r\n");
+        file2.write(QString::number(devType).toLatin1().data());
+        file2.write("\r\n");
+        QString localId = ui.localId->text();
+        file2.write(localId.toLatin1().data());
+        file2.write("\r\n");
+        QString validTime = ui.validTime->text();
+        file2.write(validTime.toLatin1().data());
+        file2.write("\r\n");
+        QString localIp = ui.localIp->text();
+        file2.write(localIp.toLatin1().data());
+        file2.write("\r\n");
+        QString beatTime = ui.beatTime->text();
+        file2.write(beatTime.toLatin1().data());
+        file2.write("\r\n");
+        QString localPort = ui.localPort->text();
+        file2.write(localPort.toLatin1().data());
+        file2.write("\r\n");
+        QString beatCnt = ui.beatCnt->text();
+        file2.write(beatCnt.toLatin1().data());
+        file2.write("\r\n");
+        QString localArea = ui.localArea->text();
+        file2.write(localArea.toLatin1().data());
+        file2.write("\r\n");
+        QString mediaPort = ui.mediaPort->text();
+        file2.write(mediaPort.toLatin1().data());
+        file2.write("\r\n");
+        if (protoType == 0){
+            int autType = ui.authMethod->currentIndex();
+            QString path = ui.LineEdit_9->text();
+            file2.write(QString::number(autType).toLatin1().data());
+            file2.write("\r\n");
+            file2.write(path.toLatin1().data());
+            file2.write("\r\n");
+        }else{
+            QString passwd = ui.LineEdit_10->text();
+            file2.write(passwd.toLatin1().data());
+            file2.write("\r\n");
+        }
+        file2.close();
+    }
+
 }
 
 int ConfigureGuide::CheackLen(QString sttr)
