@@ -1,3 +1,6 @@
+#include<QTextCursor>
+#include <QMetaType>
+#include <QTextCursor>
 #include "AWGBCheckTool.h"
 
 showThread::showThread(QObject*)
@@ -14,17 +17,19 @@ void showThread::run()
 {
     int i = 0;
     while(i < 30){
-        IC->ui.textBrowser->append(QString("pppppppppppppppp"));
+        browser->append(QString("pppppppppppppppp"));
 //        QApplication::processEvents();
         i++;
+        browser->moveCursor(QTextCursor::End);
         Sleep(500);
+
     }
     emit isDone();
 }
 
 
-void showThread::setIc(AWGBCheckTool *ic)
+void showThread::setTextBrowser(QTextBrowser *textBrowser)
 {
-    IC = ic;
+    browser = textBrowser;
 }
 

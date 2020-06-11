@@ -327,5 +327,7 @@ void ConfigureGuide::SetConfigure(void* param)
     IC->setAttribute(Qt::WA_DeleteOnClose);
     IC->show();
     IC->showST();
+    IC->showTreeView();
+    IC->showCheckRes();
     this->close();
 }

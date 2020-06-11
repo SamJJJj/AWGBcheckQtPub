@@ -27,7 +27,9 @@ SOURCES += \
         main.cpp \
         AWGBCheckTool.cpp \
     ConfigureGuide.cpp \
-    showthread.cpp
+    showcheckres.cpp \
+    showthread.cpp \
+    showtree.cpp
 
 HEADERS += \
         AWGBCheckTool.h \
