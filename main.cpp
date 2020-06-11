@@ -38,7 +38,7 @@ void testXml()
     {
         pszXmlNodeContent = (char *)xmlNodeGetContent(pstXmlSubNode);
         cout << pszXmlNodeContent << endl;
-        cout << (char)pszXmlNodeContent->name << endl;
+//        cout << (char)pszXmlNodeContent->name << endl;
         pstXmlSubNode = pstXmlSubNode->next;
     }
 }

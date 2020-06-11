@@ -67,30 +67,30 @@ void ConfigureGuide::inConf(){
         if (data.trimmed() == '4'){ui.modelType->setCurrentIndex(4);}
     }
     data = file.readLine().data();
-    ui.localId->setText(data);
+    ui.localId->setText(data.trimmed());
     data = file.readLine().data();
-    ui.validTime->setText(data);
+    ui.validTime->setText(data.trimmed());
     data = file.readLine().data();
-    ui.localIp->setText(data);
+    ui.localIp->setText(data.trimmed());
     data = file.readLine().data();
-    ui.beatTime->setText(data);
+    ui.beatTime->setText(data.trimmed());
     data = file.readLine().data();
-    ui.localPort->setText(data);
+    ui.localPort->setText(data.trimmed());
     data = file.readLine().data();
-    ui.beatCnt->setText(data);
+    ui.beatCnt->setText(data.trimmed());
     data = file.readLine().data();
-    ui.localArea->setText(data);
+    ui.localArea->setText(data.trimmed());
     data = file.readLine().data();
-    ui.mediaPort->setText(data);
+    ui.mediaPort->setText(data.trimmed());
     if (flag == 0){
         data = file.readLine().data();
         if (data.trimmed() == '0'){ui.authMethod->setCurrentIndex(0);}
         if (data.trimmed() == '1'){ui.authMethod->setCurrentIndex(1);}
         data = file.readLine().data();
-        ui.LineEdit_9->setText(data);
+        ui.LineEdit_9->setText(data.trimmed());
     }else{
         data = file.readLine().data();
-        ui.LineEdit_10->setText(data);
+        ui.LineEdit_10->setText(data.trimmed());
     }
 }
 void ConfigureGuide::initConf(){
@@ -122,53 +122,55 @@ void ConfigureGuide::exConf(){
         int devType = ui.modelType->currentIndex();
         QFile file("list.txt");//括号内为文件路径
         file.open(( QIODevice::Append));
-        file.write(text.toLatin1().data());
+        file.write(text.trimmed().toLatin1().data());
         file.write("\r\n");
         file.close();
         QFile file2(text+".txt");//括号内为文件路径
         file2.open(( QIODevice::WriteOnly));
-        file2.write(QString::number(protoType).toLatin1().data());
+        file2.write(QString::number(protoType).trimmed().toLatin1().data());
         file2.write("\r\n");
-        file2.write(QString::number(devType).toLatin1().data());
+        file2.write(QString::number(devType).trimmed().toLatin1().data());
         file2.write("\r\n");
         QString localId = ui.localId->text();
-        file2.write(localId.toLatin1().data());
+        file2.write(localId.trimmed().toLatin1().data());
         file2.write("\r\n");
         QString validTime = ui.validTime->text();
-        file2.write(validTime.toLatin1().data());
+        file2.write(validTime.trimmed().toLatin1().data());
         file2.write("\r\n");
         QString localIp = ui.localIp->text();
-        file2.write(localIp.toLatin1().data());
+        file2.write(localIp.trimmed().toLatin1().data());
         file2.write("\r\n");
         QString beatTime = ui.beatTime->text();
-        file2.write(beatTime.toLatin1().data());
+        file2.write(beatTime.trimmed().toLatin1().data());
         file2.write("\r\n");
         QString localPort = ui.localPort->text();
-        file2.write(localPort.toLatin1().data());
+        file2.write(localPort.trimmed().toLatin1().data());
         file2.write("\r\n");
         QString beatCnt = ui.beatCnt->text();
-        file2.write(beatCnt.toLatin1().data());
+        file2.write(beatCnt.trimmed().toLatin1().data());
         file2.write("\r\n");
         QString localArea = ui.localArea->text();
-        file2.write(localArea.toLatin1().data());
+        file2.write(localArea.trimmed().toLatin1().data());
         file2.write("\r\n");
         QString mediaPort = ui.mediaPort->text();
-        file2.write(mediaPort.toLatin1().data());
+        file2.write(mediaPort.trimmed().toLatin1().data());
         file2.write("\r\n");
         if (protoType == 0){
             int autType = ui.authMethod->currentIndex();
             QString path = ui.LineEdit_9->text();
-            file2.write(QString::number(autType).toLatin1().data());
+            file2.write(QString::number(autType).trimmed().toLatin1().data());
             file2.write("\r\n");
-            file2.write(path.toLatin1().data());
+            file2.write(path.trimmed().toLatin1().data());
             file2.write("\r\n");
         }else{
             QString passwd = ui.LineEdit_10->text();
-            file2.write(passwd.toLatin1().data());
+            file2.write(passwd.trimmed().toLatin1().data());
             file2.write("\r\n");
         }
         file2.close();
     }
+    ui.boBox_1->clear();
+    initConf();
 
 }
 
