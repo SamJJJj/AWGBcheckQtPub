@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QTextBrowser>
+
 using namespace std;
 AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
 	: QMainWindow(parent)
@@ -322,6 +323,11 @@ void AWGBCheckTool::showST()
     showT->start();
 }
 
+void makeDeviceInfoXml(char * dst, pGBStart_s rawData)
+{
+
+}
+
 void AWGBCheckTool::showCheckRes()
 {
     showCheckResT->setTableView(ui.tableView, handle);
@@ -407,6 +413,7 @@ void AWGBCheckTool::deviceRegister()
         content->passwdLen = datatemp.toString().length();
     }
     cout << "copy ok" << endl;
+
     //传给后端
     free(content);
 }
