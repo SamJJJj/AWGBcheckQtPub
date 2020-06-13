@@ -39,11 +39,8 @@ HEADERS += \
     AWQueue.h \
     ConfigureGuide.h \
     beanstalk.h \
-    iconv.h \
     main.h \
-    tinyxml2.h \
-    zconf.h \
-    zlib.h
+    tinyxml2.h
 
 FORMS += \
         AWGBCheckTool.ui \
@@ -51,4 +48,4 @@ FORMS += \
 _ConfigureGuide.ui
         
 
-INCLUDEPATH += D:\qt\AWGBCheckTool
+INCLUDEPATH += D:\Qt\myprojects\AWGBCheckTool

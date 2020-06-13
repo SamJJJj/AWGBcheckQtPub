@@ -30,3 +30,4 @@ private:
 };
 
 void strcpy(uc * dst, char * src);
+void makeDeviceInfoXml(pGBStart_s, char *, bool);
