@@ -1,7 +1,6 @@
 ﻿#include "ConfigureGuide.h"
 #include "main.h"
 #include "AWQueue.h"
-#include "tinyxml2.h"
 #include <qvalidator.h>
 #include <qlineedit.h>
 #include <iostream>
@@ -13,7 +12,6 @@
 #include <QInputDialog>
 
 using namespace std;
-using namespace tinyxml2;
 
 ConfigureGuide::ConfigureGuide(QWidget *parent, void *param, int h)
 	: QWidget(parent)
@@ -265,111 +263,6 @@ void strcpy(uc * dst, char * src)
     while( (*dst++ = (uc)(*src++)) != '\0' );
 }
 
-void makeDeviceInfoXml(pGBStart_s param, char *xmlBuffer, bool flag)
-{
-    tinyxml2::XMLDocument doc;
-
-    XMLElement * root = doc.NewElement("Request");
-    doc.InsertEndChild(root);
-
-    XMLElement * cmdType = doc.NewElement("cmdType");
-    XMLText *docCmdTypeText = doc.NewText("DeviceInfo");
-    cmdType->InsertEndChild(docCmdTypeText);
-    root->InsertEndChild(cmdType);
-
-    XMLElement *deviceType = doc.NewElement("DeviceType");
-    XMLText *docDeviceTypeText = doc.NewText(QString::number(param->modeType).toStdString().c_str());
-    deviceType->InsertEndChild(docDeviceTypeText);
-    root->InsertEndChild(deviceType);
-
-    XMLElement *protoType = doc.NewElement("ProtoType");
-    XMLText *docProtoTypeText = doc.NewText(QString::number(param->protoType).toStdString().c_str());
-    protoType->InsertEndChild(docProtoTypeText);
-    root->InsertEndChild(protoType);
-
-    if(!param->protoType)
-    {
-        XMLElement *authMethod = doc.NewElement("AuthMethod");
-        XMLText *docAuthMethodText = doc.NewText(QString::number(param->authMethod).toStdString().c_str());
-        authMethod->InsertEndChild(docAuthMethodText);
-        root->InsertEndChild(authMethod);
-    }
-
-    XMLElement *charSet = doc.NewElement("CharSet");
-    XMLText *docCharSetText = doc.NewText(QString::number(param->charSet).toStdString().c_str());
-    charSet->InsertEndChild(docCharSetText);
-    root->InsertEndChild(charSet);
-
-
-    XMLElement *local = doc.NewElement("local");
-    XMLText *localText;
-    if(flag)
-        localText = doc.NewText("OK");
-    else
-        localText = doc.NewText("NO");
-    local->InsertEndChild(localText);
-    root->InsertEndChild(local);
-
-
-    XMLElement *deviceId = doc.NewElement("DeviceId");
-    XMLText *docDeviceIdText = doc.NewText((char*)param->localId);
-    deviceId->InsertEndChild(docDeviceIdText);
-    root->InsertEndChild(deviceId);
-
-    XMLElement *deviceIp = doc.NewElement("DeviceIp");
-    XMLText *docDeviceIpText = doc.NewText((char*)param->localIp);
-    deviceIp->InsertEndChild(docDeviceIpText);
-    root->InsertEndChild(deviceIp);
-
-    XMLElement *devicePort = doc.NewElement("DevicePort");
-    XMLText *docDevicePortText = doc.NewText((char*)param->localPort);
-    devicePort->InsertEndChild(docDevicePortText);
-    root->InsertEndChild(devicePort);
-
-    XMLElement *validTime = doc.NewElement("ValidTime");
-    XMLText *docValidTimeText = doc.NewText((char*)param->validTime);
-    validTime->InsertEndChild(docValidTimeText);
-    root->InsertEndChild(validTime);
-
-    XMLElement *beatTime = doc.NewElement("BeatTime");
-    XMLText *docBeatTimeText = doc.NewText((char*)param->beatTime);
-    beatTime->InsertEndChild(docBeatTimeText);
-    root->InsertEndChild(beatTime);
-
-    XMLElement *beatCnt = doc.NewElement("BeatCnt");
-    XMLText *docBeatCntText = doc.NewText((char*)param->beatCnt);
-    beatCnt->InsertEndChild(docBeatCntText);
-    root->InsertEndChild(beatCnt);
-
-    XMLElement *deviceArea = doc.NewElement("DeviceArea");
-    XMLText *docDeviceAreaText = doc.NewText((char*)param->localArea);
-    deviceArea->InsertEndChild(docDeviceAreaText);
-    root->InsertEndChild(deviceArea);
-
-    XMLElement *mediaPort = doc.NewElement("MediaPort");
-    XMLText *docMediaPortText = doc.NewText((char*)param->mediaPort);
-    mediaPort->InsertEndChild(docMediaPortText);
-    root->InsertEndChild(mediaPort);
-
-    if(param->protoType)
-    {
-        XMLElement *passwd = doc.NewElement("Passwd");
-        XMLText *docPasswdText = doc.NewText((char*)param->passwd);
-        passwd->InsertEndChild(docPasswdText);
-        root->InsertEndChild(passwd);
-    }
-    else {
-        XMLElement *path = doc.NewElement("Path");
-        XMLText *docPathText = doc.NewText((char*)param->path);
-        path->InsertEndChild(docPathText);
-        root->InsertEndChild(path);
-    }
-//    memcpy(xmlBuffer, doc.ToText(), strlen((char*)doc.ToText()));
-    XMLPrinter printer;
-    doc.Print( &printer );//将Print打印到Xmlprint类中 即保存在内存中
-    memcpy(xmlBuffer, printer.CStr(), printer.CStrSize());
-}
-
 void ConfigureGuide::SetConfigure(void* param)
 {
 
@@ -435,9 +328,7 @@ void ConfigureGuide::SetConfigure(void* param)
    // free(param);    //��ʱ��������free
 
     int ret;
-    char buf[2048] = {0};
-    makeDeviceInfoXml(res, buf, true);
-    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
+    ret = AW_BSQueue_PutBuffer(handle, res->localId, strlen((char*)res->path));
     cout << "put:" << ret << endl;
 
     AWGBCheckTool *IC = new AWGBCheckTool(Q_NULLPTR, res, handle);

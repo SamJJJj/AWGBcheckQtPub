@@ -10,15 +10,15 @@ ShowTree::~ShowTree()
 
 }
 
-void ShowTree::setTreeView(QStandardItemModel * tree)
+void ShowTree::setTreeView(QTreeView * tree)
 {
-    treeModel = tree;
+    treeView = tree;
 }
 
 void ShowTree::run()
 {
-//    QStandardItemModel *treeModel = new QStandardItemModel(treeView);    //设置不可修改
-//    treeModel->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    QStandardItemModel *treeModel = new QStandardItemModel(treeView);    //设置不可修改
+    treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     //不设置会默显示一个1，需要修改
     treeModel->setHorizontalHeaderLabels(QStringList() << QStringLiteral("Id(设备名)"));
     QStandardItem* it1=new QStandardItem(QString("00000000000000000000"));
@@ -27,8 +27,7 @@ void ShowTree::run()
     treeModel->appendRow(it1);
     it1->appendRow(it2);
     it1->appendRow(it3);
-    emit showTree();
-//    treeView->setModel(treeModel);
+    treeView->setModel(treeModel);
 }
 
 

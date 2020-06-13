@@ -1,6 +1,5 @@
 ﻿#include "AWGBCheckTool.h"
 #include "ConfigureGuide.h"
-#include "tinyxml2.h"
 #include <QListWidget>
 #include <QComboBox>
 #include <iostream>
@@ -8,7 +7,6 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QTextBrowser>
-
 using namespace std;
 AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
 	: QMainWindow(parent)
@@ -20,21 +18,27 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     showT = new showThread;
     showCheckResT = new ShowCheckResThread;
     showTreeT = new ShowTree;
-    treeModel = new QStandardItemModel(ui.treeView);
-    checkResModel = new QStandardItemModel(ui.tableView);
-    ui.pushButton_6->setEnabled(false);
-    ui.pushButton_7->setEnabled(false);
+    ui.dateEdit->setCalendarPopup(true);
+    ui.dateEdit_2->setCalendarPopup(true);
+    ui.dateEdit->setDateTime(QDateTime::currentDateTime());
+    ui.dateEdit_2->setDateTime(QDateTime::currentDateTime().addDays(365));
+    ui.timeEdit_3->setTime(QTime::currentTime());
+    ui.timeEdit_31->setTime(QTime::currentTime());
+//    ui.pushButton_5->setEnabled(false);
+//    ui.pushButton_7->setEnabled(false);
     connect(ui.tableView_2->model(), &QStandardItemModel::dataChanged, this, &AWGBCheckTool::dataChangedSlot);
     connect(ui.pushButton_8, &QPushButton::clicked, this, &AWGBCheckTool::deviceRegister);
-    connect(ui.pushButton_5, &QPushButton::clicked, this, &AWGBCheckTool::deviceCatalog);
-    connect(ui.pushButton_23, &QPushButton::clicked, this, &AWGBCheckTool::toControlPage);
+    connect(ui.pushButton_6, &QPushButton::clicked, this, &AWGBCheckTool::deviceCatalog);
+    connect(ui.pushButton_23, &QPushButton::clicked, this, &AWGBCheckTool::to ControlPage);
     connect(ui.pushButton_13, &QPushButton::clicked, this, &AWGBCheckTool::toListPage);
     connect(ui.pushButton, &QPushButton::clicked, this, &AWGBCheckTool::toVideoPage);
     connect(ui.pushButton_9, &QPushButton::clicked, this, &AWGBCheckTool::toSipPage);
-    connect(showTreeT, &ShowTree::showTree, this, &AWGBCheckTool::setTree);
-    connect(showCheckResT, &ShowCheckResThread::showCheck, this, &AWGBCheckTool::setCheckRes);
-}
+    connect(ui.pushButton_7, &QPushButton::clicked, this, &AWGBCheckTool::prePage);
+    connect(ui.pushButton_5, &QPushButton::clicked, this, &AWGBCheckTool::nextPage);
+    connect(ui.pushButton_39, &QPushButton::clicked, this, &AWGBCheckTool::prePage);
+    connect(ui.pushButton_38, &QPushButton::clicked, this, &AWGBCheckTool::nextPage);
 
+}
 AWGBCheckTool::~AWGBCheckTool()
 {
     showT->terminate();
@@ -77,6 +81,45 @@ inline int proto2Int(QString s)
     else
         return -1;
 }
+void AWGBCheckTool::prePage(){
+    int cur = ui.stackedWidget->currentIndex();
+    if (cur == 0){
+        ui.stackedWidget->setCurrentIndex(2);
+        ui.stackedWidget_3->setMaximumHeight(330);
+        ui.stackedWidget_3->setCurrentIndex(1);
+        ui.stackedWidget_2->setCurrentIndex(3);
+    }else if (cur == 1){
+        ui.stackedWidget->setCurrentIndex(0);
+        ui.stackedWidget_3->setMaximumHeight(112);
+        ui.stackedWidget_3->setCurrentIndex(0);
+        ui.stackedWidget_2->setCurrentIndex(1);
+    }else{
+        ui.stackedWidget->setCurrentIndex(1);
+        ui.stackedWidget_3->setMaximumHeight(112);
+        ui.stackedWidget_3->setCurrentIndex(0);
+        ui.stackedWidget_2->setCurrentIndex(2);
+    }
+}
+void AWGBCheckTool::nextPage(){
+    int cur = ui.stackedWidget->currentIndex();
+    if (cur == 0){
+        ui.stackedWidget->setCurrentIndex(1);
+        ui.stackedWidget_3->setMaximumHeight(112);
+        ui.stackedWidget_3->setCurrentIndex(0);
+        ui.stackedWidget_2->setCurrentIndex(2);
+    }else if (cur == 1){
+        ui.stackedWidget->setCurrentIndex(2);
+        ui.stackedWidget_3->setMaximumHeight(330);
+        ui.stackedWidget_3->setCurrentIndex(1);
+        ui.stackedWidget_2->setCurrentIndex(3);
+    }else{
+        ui.stackedWidget->setCurrentIndex(0);
+        ui.stackedWidget_3->setMaximumHeight(112);
+        ui.stackedWidget_3->setCurrentIndex(0);
+        ui.stackedWidget_2->setCurrentIndex(1);
+    }
+}
+
 void AWGBCheckTool::EndList(){
 
     ui.textBrowser->moveCursor(QTextCursor::End);
@@ -328,16 +371,15 @@ void AWGBCheckTool::showST()
     showT->start();
 }
 
-
 void AWGBCheckTool::showCheckRes()
 {
-    showCheckResT->setTableView(checkResModel, handle);
+    showCheckResT->setTableView(ui.tableView, handle);
     showCheckResT->start();
 }
 
 void AWGBCheckTool::showTreeView()
 {
-    showTreeT->setTreeView(treeModel);
+    showTreeT->setTreeView(ui.treeView);
     showTreeT->start();
     connect(ui.treeView, &QTreeView::clicked, this, &AWGBCheckTool::showTreeInCurrentInterface);
     connect(ui.treeView, &QTreeView::clicked, this, [=]{ui.pushButton_8->setEnabled(false);});
@@ -444,14 +486,4 @@ void AWGBCheckTool::toSipPage()
 {
     ui.stackedWidget->setCurrentIndex(0);
     ui.stackedWidget_2->setCurrentIndex(1);
-}
-
-void AWGBCheckTool::setTree()
-{
-    ui.treeView->setModel(treeModel);
-}
-
-void AWGBCheckTool::setCheckRes()
-{
-    ui.tableView->setModel(checkResModel);
 }

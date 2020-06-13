@@ -1,15 +1,35 @@
-#include <QtWidgets/QApplication>
+﻿#include <QtWidgets/QApplication>
 #include <QProcess>
 #include <iostream>
-#include "tinyxml2.h"
 #include "AWQueue.h"
 #include "AWGBCheckTool.h"
 #include "ConfigureGuide.h"
 #include "main.h"
-using namespace tinyxml2;
+#include "tinyxml2.h"
 
 using namespace std;
+using namespace tinyxml2;
 
+void testXml()
+{
+
+    static const char* xml =
+            "<?xml version=\"1.0\"?>"
+            "<!DOCTYPE PLAY SYSTEM \"play.dtd\">"
+            "<PLAY>"
+            "<TITLE>A Midsummer Night's Dream</TITLE>"
+            "</PLAY>";
+
+        tinyxml2::XMLDocument doc;
+        doc.Parse( xml );
+        XMLElement* titleElement = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" );
+        const char* title = titleElement->GetText();
+        printf( "Name of play (1): %s\n", title );
+//        XMLText* textNode = titleElement->FirstChild()->ToText();
+//        title = textNode->Value();
+//        printf( "Name of play (2): %s\n", title );
+
+}
 
 using namespace std;
 int main(int argc, char *argv[])
@@ -24,6 +44,7 @@ int main(int argc, char *argv[])
         cout << "init OK" << endl;
 	QApplication a(argc, argv);
     ConfigureGuide w(NULL, GB, handle);
+    testXml();
 	w.show();
     a.exec();
     pro->kill();

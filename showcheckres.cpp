@@ -14,41 +14,26 @@ ShowCheckResThread::~ShowCheckResThread()
     ;
 }
 
-void ShowCheckResThread::setTableView(QStandardItemModel * table, int h)
+void ShowCheckResThread::setTableView(QTableView * table, int h)
 {
-    checkResModel = table;
+    tableView = table;
     handle = h;
 }
 
 void ShowCheckResThread::run()
 {
-//    QStandardItemModel *checkResModel = new QStandardItemModel();
-//    checkResModel->moveToThread(tableView->thread());
-//    checkResModel->setParent(tableView);
+    Sleep(500);
+    QStandardItemModel *checkResModel = new QStandardItemModel(tableView);
     checkResModel->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("设备ID")));
     checkResModel->setHorizontalHeaderItem(1, new QStandardItem(QObject::tr("设备类型")));
     checkResModel->setHorizontalHeaderItem(2, new QStandardItem(QObject::tr("信令类型")));
     checkResModel->setHorizontalHeaderItem(3, new QStandardItem(QObject::tr("状态")));
-//    tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    unsigned char * bufRecv = (unsigned char *)calloc(2048, sizeof(char));
-    unsigned int len = 2048;
-    int ret;
-    while(1)
-    {
-        Sleep(500);
-//        unsigned char *bufRecv = NULL;
-//        unsigned int len;
-//        AW_BSQueue_GetBuffer(handle, bufRecv, &len);
-//        bufRecv = (unsigned char*)malloc(len + 1);
-        ret = AW_BSQueue_GetBuffer(handle, bufRecv, &len);
-        bufRecv[len] = 0;
-        if(!ret)
-            cout << "get:" << len << endl;
-        memset(bufRecv, 0, 2048);
-        emit showCheck();
-//        checkResModel->setItem(0,1, new QStandardItem(QString((char*)bufRecv)));
-    }
-    free(bufRecv);
-//    tableView->setModel(checkResModel);
+    tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    unsigned char buf[1024] = {0};
+    unsigned int len;
+    AW_BSQueue_GetBuffer(handle, buf, &len);
+    cout << "get:" << len << endl;
+    checkResModel->setItem(0,1, new QStandardItem(QString((char*)buf)));
+    tableView->setModel(checkResModel);
     //取数据显示。。
 }

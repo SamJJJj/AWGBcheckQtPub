@@ -203,7 +203,7 @@ int AW_BSQueue_GetBuffer(int QHandle, unsigned char *Buf, unsigned int *Buf_len)
 {
     BSJ *job = NULL;
 
-   if(bs_reserve_with_timeout(QHandle, 0, &job) != BS_STATUS_OK) return BS_STATUS_FAIL;
+    if(bs_reserve_with_timeout(QHandle, 0, &job) != BS_STATUS_OK) return BS_STATUS_FAIL;
     
     if(Buf == NULL)
     {
@@ -222,7 +222,7 @@ int AW_BSQueue_GetBuffer(int QHandle, unsigned char *Buf, unsigned int *Buf_len)
 
     memcpy(Buf, job->data, job->size);
     *Buf_len = job->size;
-//    sleep(1);
+
     if(bs_delete(QHandle, job->id) != BS_STATUS_OK)
     {
         bs_free_job(job);
