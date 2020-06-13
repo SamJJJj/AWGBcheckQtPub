@@ -11,27 +11,32 @@ class AWGBCheckTool;
 class ShowTree: public QThread
 {
     friend class AWGBCheckTool;
+    Q_OBJECT
 public:
     explicit ShowTree(QObject * parent = 0);
     ~ShowTree();
-    void setTreeView(QTreeView *);
+    void setTreeView(QStandardItemModel *);
 protected:
     void run();
+signals:
+    void showTree();
 private:
-    QTreeView * treeView;
+    QStandardItemModel * treeModel;
 };
 
 class ShowCheckResThread: public QThread
 {
     friend class AWGBCheckTool;
+    Q_OBJECT
 public:
     explicit ShowCheckResThread(QObject * parent = 0);
     ~ShowCheckResThread();
-    void setTableView(QTableView *, int handle);
+    void setTableView(QStandardItemModel *, int handle);
 protected:
     void run();
+signals:
+    void showCheck();
 private:
-    QTableView *tableView;
     QStandardItemModel *checkResModel;
     int handle;
 };
@@ -70,6 +75,8 @@ private:
     showThread *showT;
     ShowCheckResThread *showCheckResT;
     ShowTree *showTreeT;
+    QStandardItemModel *treeModel;
+    QStandardItemModel *checkResModel;
     int handle;
     void SetList(pGBStart_s);
     void EndList();
@@ -84,4 +91,6 @@ private slots:
     void toListPage();
     void toVideoPage();
     void toSipPage();
+    void setTree();
+    void setCheckRes();
 };

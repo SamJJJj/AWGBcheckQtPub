@@ -1,5 +1,6 @@
 ﻿#include "AWGBCheckTool.h"
 #include "ConfigureGuide.h"
+#include "tinyxml2.h"
 #include <QListWidget>
 #include <QComboBox>
 #include <iostream>
@@ -19,6 +20,8 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     showT = new showThread;
     showCheckResT = new ShowCheckResThread;
     showTreeT = new ShowTree;
+    treeModel = new QStandardItemModel(ui.treeView);
+    checkResModel = new QStandardItemModel(ui.tableView);
     ui.pushButton_6->setEnabled(false);
     ui.pushButton_7->setEnabled(false);
     connect(ui.tableView_2->model(), &QStandardItemModel::dataChanged, this, &AWGBCheckTool::dataChangedSlot);
@@ -28,6 +31,8 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(ui.pushButton_13, &QPushButton::clicked, this, &AWGBCheckTool::toListPage);
     connect(ui.pushButton, &QPushButton::clicked, this, &AWGBCheckTool::toVideoPage);
     connect(ui.pushButton_9, &QPushButton::clicked, this, &AWGBCheckTool::toSipPage);
+    connect(showTreeT, &ShowTree::showTree, this, &AWGBCheckTool::setTree);
+    connect(showCheckResT, &ShowCheckResThread::showCheck, this, &AWGBCheckTool::setCheckRes);
 }
 
 AWGBCheckTool::~AWGBCheckTool()
@@ -323,20 +328,16 @@ void AWGBCheckTool::showST()
     showT->start();
 }
 
-void makeDeviceInfoXml(char * dst, pGBStart_s rawData)
-{
-
-}
 
 void AWGBCheckTool::showCheckRes()
 {
-    showCheckResT->setTableView(ui.tableView, handle);
+    showCheckResT->setTableView(checkResModel, handle);
     showCheckResT->start();
 }
 
 void AWGBCheckTool::showTreeView()
 {
-    showTreeT->setTreeView(ui.treeView);
+    showTreeT->setTreeView(treeModel);
     showTreeT->start();
     connect(ui.treeView, &QTreeView::clicked, this, &AWGBCheckTool::showTreeInCurrentInterface);
     connect(ui.treeView, &QTreeView::clicked, this, [=]{ui.pushButton_8->setEnabled(false);});
@@ -443,4 +444,14 @@ void AWGBCheckTool::toSipPage()
 {
     ui.stackedWidget->setCurrentIndex(0);
     ui.stackedWidget_2->setCurrentIndex(1);
+}
+
+void AWGBCheckTool::setTree()
+{
+    ui.treeView->setModel(treeModel);
+}
+
+void AWGBCheckTool::setCheckRes()
+{
+    ui.tableView->setModel(checkResModel);
 }
