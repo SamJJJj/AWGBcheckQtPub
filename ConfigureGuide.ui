@@ -101,7 +101,7 @@
              </size>
             </property>
             <property name="text">
-             <string>测试目标类型</string>
+             <string>测试目标类型:</string>
             </property>
            </widget>
           </item>
@@ -314,8 +314,20 @@
                </item>
                <item>
                 <widget class="QLabel" name="Label_2">
+                 <property name="minimumSize">
+                  <size>
+                   <width>110</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
-                  <string>协议</string>
+                  <string>协议:</string>
                  </property>
                 </widget>
                </item>
@@ -384,20 +396,20 @@
                   <widget class="QLabel" name="Label_3">
                    <property name="geometry">
                     <rect>
-                     <x>10</x>
+                     <x>30</x>
                      <y>0</y>
                      <width>71</width>
                      <height>16</height>
                     </rect>
                    </property>
                    <property name="text">
-                    <string>认证方式</string>
+                    <string>认证方式:</string>
                    </property>
                   </widget>
                   <widget class="QComboBox" name="authMethod">
                    <property name="geometry">
                     <rect>
-                     <x>180</x>
+                     <x>130</x>
                      <y>0</y>
                      <width>300</width>
                      <height>21</height>
@@ -479,7 +491,7 @@
                <item>
                 <widget class="QLabel" name="Label_4">
                  <property name="text">
-                  <string>本地ID</string>
+                  <string>本地ID:</string>
                  </property>
                 </widget>
                </item>
@@ -561,7 +573,7 @@
                <item>
                 <widget class="QLabel" name="Label_6">
                  <property name="text">
-                  <string>本地IP</string>
+                  <string>本地IP:</string>
                  </property>
                 </widget>
                </item>
@@ -643,7 +655,7 @@
                <item>
                 <widget class="QLabel" name="Label_8">
                  <property name="text">
-                  <string>本地端口</string>
+                  <string>本地端口:</string>
                  </property>
                 </widget>
                </item>
@@ -725,7 +737,7 @@
                <item>
                 <widget class="QLabel" name="Label_10">
                  <property name="text">
-                  <string>本地域</string>
+                  <string>本地域:</string>
                  </property>
                 </widget>
                </item>
@@ -807,7 +819,7 @@
                <item>
                 <widget class="QLabel" name="Label_12">
                  <property name="text">
-                  <string>媒体端口</string>
+                  <string>媒体端口:</string>
                  </property>
                 </widget>
                </item>
@@ -878,7 +890,7 @@
             </spacer>
            </item>
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout_9" stretch="1,5,1,5,1,5,0,0,0">
+            <layout class="QVBoxLayout" name="verticalLayout_9" stretch="1,5,1,5,1,5,0,0,0,0,0">
              <property name="spacing">
               <number>0</number>
              </property>
@@ -925,7 +937,7 @@
                <item>
                 <widget class="QLabel" name="Label_5">
                  <property name="text">
-                  <string>有效期</string>
+                  <string>有效期:</string>
                  </property>
                 </widget>
                </item>
@@ -1007,7 +1019,7 @@
                <item>
                 <widget class="QLabel" name="Label_7">
                  <property name="text">
-                  <string>心跳间隔</string>
+                  <string>心跳间隔:</string>
                  </property>
                 </widget>
                </item>
@@ -1088,8 +1100,14 @@
                </item>
                <item>
                 <widget class="QLabel" name="Label_9">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>51</height>
+                  </size>
+                 </property>
                  <property name="text">
-                  <string>心跳次数</string>
+                  <string>心跳次数:</string>
                  </property>
                 </widget>
                </item>
@@ -1136,13 +1154,13 @@
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>60</width>
-                 <height>40</height>
+                 <height>30</height>
                 </size>
                </property>
               </spacer>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="HorizontalSpacer32" stretch="1,5,0,0,1">
+              <layout class="QHBoxLayout" name="HorizontalSpacer32_2" stretch="0,5,0,0,0,1">
                <property name="spacing">
                 <number>0</number>
                </property>
@@ -1156,7 +1174,33 @@
                 <number>0</number>
                </property>
                <item>
-                <spacer name="HorizontalSpacer_32">
+                <spacer name="HorizontalSpacer_47">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>18</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QLabel" name="Label_15">
+                 <property name="maximumSize">
+                  <size>
+                   <width>200</width>
+                   <height>21</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Monitor User-Identity:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="HorizontalSpacer_49">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
@@ -1169,9 +1213,86 @@
                 </spacer>
                </item>
                <item>
+                <widget class="QLineEdit" name="lineEdit"/>
+               </item>
+               <item>
+                <spacer name="HorizontalSpacer_45">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <spacer name="HorizontalSpacer_48">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="VerticalSpacer_17">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="HorizontalSpacer32" stretch="0,5,0,0,0,0,0,0,1">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <spacer name="HorizontalSpacer_50">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>18</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
                 <widget class="QLabel" name="Label_11">
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
-                  <string>字符集</string>
+                  <string>字符集:</string>
                  </property>
                 </widget>
                </item>
@@ -1190,17 +1311,76 @@
                 </widget>
                </item>
                <item>
+                <spacer name="HorizontalSpacer_32">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <spacer name="HorizontalSpacer_51">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QLabel" name="Label_16">
+                 <property name="minimumSize">
+                  <size>
+                   <width>80</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>120</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>目录响应：</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <spacer name="HorizontalSpacer_33">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
-                   <width>275</width>
+                   <width>40</width>
                    <height>20</height>
                   </size>
                  </property>
                 </spacer>
+               </item>
+               <item>
+                <widget class="QComboBox" name="charSet_2">
+                 <item>
+                  <property name="text">
+                   <string>UDP</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>TCP</string>
+                  </property>
+                 </item>
+                </widget>
                </item>
                <item>
                 <spacer name="HorizontalSpacer_34">
@@ -1225,7 +1405,7 @@
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>40</height>
+                 <height>37</height>
                 </size>
                </property>
               </spacer>
@@ -1294,7 +1474,7 @@
               <item>
                <widget class="QLabel" name="Label_13">
                 <property name="text">
-                 <string>设备证书路径</string>
+                 <string>设备证书路径:</string>
                 </property>
                </widget>
               </item>

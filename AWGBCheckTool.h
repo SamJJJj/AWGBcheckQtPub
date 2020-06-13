@@ -93,4 +93,6 @@ private slots:
     void toSipPage();
     void setTree();
     void setCheckRes();
+    void prePage();
+    void nextPage();
 };
