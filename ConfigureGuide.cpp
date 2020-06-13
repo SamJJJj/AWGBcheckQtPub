@@ -295,10 +295,10 @@ void makeDeviceInfoXml(pGBStart_s param, char *xmlBuffer, bool flag)
 
     }
 
-//    QDomElement charSet = doc.createElement("CharSet");
-//    QDomText charSetText = doc.createTextNode(QString::number(param->charSet).toStdString().c_str());
-//    charSet.appendChild(charSetText);
-//    root.appendChild(charSet);
+    QDomElement charSet = doc.createElement("CharSet");
+    QDomText charSetText = doc.createTextNode(QString::number(param->charSet).toStdString().c_str());
+    charSet.appendChild(charSetText);
+    root.appendChild(charSet);
 
     //只能传493个Byte
     QDomElement local = doc.createElement("Local");

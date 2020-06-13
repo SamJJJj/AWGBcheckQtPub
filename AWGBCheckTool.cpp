@@ -1,6 +1,5 @@
 ﻿#include "AWGBCheckTool.h"
 #include "ConfigureGuide.h"
-#include "tinyxml2.h"
 #include <QListWidget>
 #include <QComboBox>
 #include <iostream>

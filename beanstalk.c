@@ -111,7 +111,10 @@ int bs_connect_with_timeout(const char *host, int port, float secs)
 
     // Set non-blocking
     // fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, NULL) | O_NONBLOCK);
-
+    unsigned long non_block=1;
+    res = ioctlsocket(fd,FIONBIO,(unsigned long *)&non_block);
+    if(res < 0)
+        return res;
     res = connect(fd, (struct sockaddr*)&server, sizeof(server));
     if (res < 0) {
         if (errno == EINPROGRESS) {
@@ -143,7 +146,9 @@ int bs_connect_with_timeout(const char *host, int port, float secs)
 
     // Set to blocking mode
     // fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, NULL) & ~(O_NONBLOCK));
-
+    res = ioctlsocket(fd,FIONBIO,(unsigned long *)&non_block);
+    if(res < 0)
+        return res;
     /* disable nagle - we buffer in the application layer */
     setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &state, sizeof(state));
     return fd;
@@ -184,7 +189,7 @@ char *rindex(char *a, char b)
 {
     int len = strlen(a);
     for (int i = len - 1; i >= 0; --i)
-        if (a[i] == b) return a + (i + 1);
+        if (a[i] == b) return a + i;
     return a;
 }
 
@@ -444,9 +449,12 @@ int64_t bs_put(int fd, uint32_t priority, uint32_t delay, uint32_t ttr, const ch
 int bs_delete(int fd, int64_t job) {
     BSM *message;
     char command[512] = {0};
+    int ret;
 
     snprintf(command, 512, "delete %"PRId64"\r\n", job);
     BS_SEND(fd, command, strlen(command));
+//    if (bs_send_message(fd, command, strlen(command)) < 0)
+//        return BS_STATUS_FAIL;
 
     message = bs_recv_message(fd, BS_MESSAGE_NO_BODY);
     BS_CHECK_MESSAGE(message);
