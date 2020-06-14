@@ -4,7 +4,7 @@ typedef unsigned char uc;
 
 typedef struct pGBStart_S
 {
-    int modeType;   //测试目标类型：0,IPC;1,NVR;2,解码器;3,上级平台;4,下级平台
+    int modeType;   //测试目标类型：0,IPC;1,NVR/DVR;2,解码器;3,上级平台;4,下级平台
     int protoType;  //协议类型: 0,35114; 1,28281
     int authMethod; //认证方式: 0,双向; 1,单向
     int charSet;    //字符集: 0,utf-8; 1,gb2312

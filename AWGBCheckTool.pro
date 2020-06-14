@@ -27,12 +27,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     AWQueue.c \
     beanstalk.c \
+    getandparse.cpp \
         main.cpp \
         AWGBCheckTool.cpp \
-    ConfigureGuide.cpp \
-    showcheckres.cpp \
-    showthread.cpp \
-    showtree.cpp
+    ConfigureGuide.cpp
 
 HEADERS += \
         AWGBCheckTool.h \

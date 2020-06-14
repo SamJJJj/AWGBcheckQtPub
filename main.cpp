@@ -8,8 +8,6 @@
 
 using namespace std;
 
-
-using namespace std;
 int main(int argc, char *argv[])
 {
     pGBStart_s GB = (pGBStart_s)calloc(1, sizeof(GBStart_s));

@@ -271,8 +271,8 @@ void makeDeviceInfoXml(pGBStart_s param, char *xmlBuffer, bool flag)
     QDomElement root=doc.createElement("Request");
     doc.appendChild(root);
 
-    QDomElement cmdType = doc.createElement("cmdType");
-    QDomText cmdTypeText = doc.createTextNode("DeviceInfo");
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("DevInfo");
     cmdType.appendChild(cmdTypeText);
     root.appendChild(cmdType);
 
@@ -433,11 +433,10 @@ void ConfigureGuide::SetConfigure(void* param)
    // free(param);    //��ʱ��������free
 
     int ret;
-    char buf[2048] = {0};
-    makeDeviceInfoXml(res, buf, true);
-    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
-    cout << "put:" << ret << endl;
-
+    char sendBuf[2048] = {0};
+    makeDeviceInfoXml(res, sendBuf, true);
+    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
+//    cout << "put:" << ret << endl;
     AWGBCheckTool *IC = new AWGBCheckTool(Q_NULLPTR, res, handle);
     IC->setAttribute(Qt::WA_DeleteOnClose);
     IC->show();
