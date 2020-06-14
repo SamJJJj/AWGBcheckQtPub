@@ -1,12 +1,10 @@
 #include <QtWidgets/QApplication>
 #include <QProcess>
 #include <iostream>
-#include "tinyxml2.h"
 #include "AWQueue.h"
 #include "AWGBCheckTool.h"
 #include "ConfigureGuide.h"
 #include "main.h"
-using namespace tinyxml2;
 
 using namespace std;
 

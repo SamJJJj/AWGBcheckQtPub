@@ -1,7 +1,6 @@
 ﻿#include "ConfigureGuide.h"
 #include "main.h"
 #include "AWQueue.h"
-#include "tinyxml2.h"
 #include <qvalidator.h>
 #include <qlineedit.h>
 #include <iostream>
@@ -11,9 +10,10 @@
 #include <regex>
 #include <QTextStream>
 #include <QInputDialog>
+#include <QtXml/QDomComment>
+#include <QtXml/QDomElement>
 
 using namespace std;
-using namespace tinyxml2;
 
 ConfigureGuide::ConfigureGuide(QWidget *parent, void *param, int h)
 	: QWidget(parent)
@@ -267,107 +267,105 @@ void strcpy(uc * dst, char * src)
 
 void makeDeviceInfoXml(pGBStart_s param, char *xmlBuffer, bool flag)
 {
-    tinyxml2::XMLDocument doc;
+    QDomDocument doc;
+    QDomElement root=doc.createElement("Request");
+    doc.appendChild(root);
 
-    XMLElement * root = doc.NewElement("Request");
-    doc.InsertEndChild(root);
+    QDomElement cmdType = doc.createElement("cmdType");
+    QDomText cmdTypeText = doc.createTextNode("DeviceInfo");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
 
-    XMLElement * cmdType = doc.NewElement("cmdType");
-    XMLText *docCmdTypeText = doc.NewText("DeviceInfo");
-    cmdType->InsertEndChild(docCmdTypeText);
-    root->InsertEndChild(cmdType);
+    QDomElement deviceType = doc.createElement("DeviceType");
+    QDomText deviceTypeText = doc.createTextNode(QString::number(param->modeType).toStdString().c_str());
+    deviceType.appendChild(deviceTypeText);
+    root.appendChild(deviceType);
 
-    XMLElement *deviceType = doc.NewElement("DeviceType");
-    XMLText *docDeviceTypeText = doc.NewText(QString::number(param->modeType).toStdString().c_str());
-    deviceType->InsertEndChild(docDeviceTypeText);
-    root->InsertEndChild(deviceType);
-
-    XMLElement *protoType = doc.NewElement("ProtoType");
-    XMLText *docProtoTypeText = doc.NewText(QString::number(param->protoType).toStdString().c_str());
-    protoType->InsertEndChild(docProtoTypeText);
-    root->InsertEndChild(protoType);
+    QDomElement protoType = doc.createElement("ProtoType");
+    QDomText protoTypeText = doc.createTextNode(QString::number(param->protoType).toStdString().c_str());
+    protoType.appendChild(protoTypeText);
+    root.appendChild(protoType);
 
     if(!param->protoType)
     {
-        XMLElement *authMethod = doc.NewElement("AuthMethod");
-        XMLText *docAuthMethodText = doc.NewText(QString::number(param->authMethod).toStdString().c_str());
-        authMethod->InsertEndChild(docAuthMethodText);
-        root->InsertEndChild(authMethod);
+        QDomElement authMethod = doc.createElement("AuthMethod");
+        QDomText authMethodText = doc.createTextNode(QString::number(param->authMethod).toStdString().c_str());
+        authMethod.appendChild(authMethodText);
+        root.appendChild(authMethod);
+
     }
 
-    XMLElement *charSet = doc.NewElement("CharSet");
-    XMLText *docCharSetText = doc.NewText(QString::number(param->charSet).toStdString().c_str());
-    charSet->InsertEndChild(docCharSetText);
-    root->InsertEndChild(charSet);
+    QDomElement charSet = doc.createElement("CharSet");
+    QDomText charSetText = doc.createTextNode(QString::number(param->charSet).toStdString().c_str());
+    charSet.appendChild(charSetText);
+    root.appendChild(charSet);
 
-
-    XMLElement *local = doc.NewElement("local");
-    XMLText *localText;
+    //只能传493个Byte
+    QDomElement local = doc.createElement("Local");
+    QDomText localText;
     if(flag)
-        localText = doc.NewText("OK");
+        localText = doc.createTextNode("OK");
     else
-        localText = doc.NewText("NO");
-    local->InsertEndChild(localText);
-    root->InsertEndChild(local);
+        localText = doc.createTextNode("NO");
+    local.appendChild(localText);
+    root.appendChild(local);
 
+    QDomElement deviceId = doc.createElement("DeviceId");
+    QDomText deviceIdText = doc.createTextNode(QString((char *)param->localId));
+    deviceId.appendChild(deviceIdText);
+    root.appendChild(deviceId);
 
-    XMLElement *deviceId = doc.NewElement("DeviceId");
-    XMLText *docDeviceIdText = doc.NewText((char*)param->localId);
-    deviceId->InsertEndChild(docDeviceIdText);
-    root->InsertEndChild(deviceId);
+    QDomElement deviceIp = doc.createElement("DeviceIp");
+    QDomText deviceIpText = doc.createTextNode(QString((char *)param->localIp));
+    deviceIp.appendChild(deviceIpText);
+    root.appendChild(deviceIp);
 
-    XMLElement *deviceIp = doc.NewElement("DeviceIp");
-    XMLText *docDeviceIpText = doc.NewText((char*)param->localIp);
-    deviceIp->InsertEndChild(docDeviceIpText);
-    root->InsertEndChild(deviceIp);
+    QDomElement devicePort = doc.createElement("DevicePort");
+    QDomText devicePortText = doc.createTextNode(QString((char *)param->localPort));
+    devicePort.appendChild(devicePortText);
+    root.appendChild(devicePort);
 
-    XMLElement *devicePort = doc.NewElement("DevicePort");
-    XMLText *docDevicePortText = doc.NewText((char*)param->localPort);
-    devicePort->InsertEndChild(docDevicePortText);
-    root->InsertEndChild(devicePort);
+    QDomElement validTime = doc.createElement("ValidTime");
+    QDomText validTimeText = doc.createTextNode(QString((char *)param->validTime));
+    validTime.appendChild(validTimeText);
+    root.appendChild(validTime);
 
-    XMLElement *validTime = doc.NewElement("ValidTime");
-    XMLText *docValidTimeText = doc.NewText((char*)param->validTime);
-    validTime->InsertEndChild(docValidTimeText);
-    root->InsertEndChild(validTime);
+    QDomElement beatTime = doc.createElement("BeatTime");
+    QDomText beatTimeText = doc.createTextNode(QString((char *)param->beatTime));
+    beatTime.appendChild(beatTimeText);
+    root.appendChild(beatTime);
 
-    XMLElement *beatTime = doc.NewElement("BeatTime");
-    XMLText *docBeatTimeText = doc.NewText((char*)param->beatTime);
-    beatTime->InsertEndChild(docBeatTimeText);
-    root->InsertEndChild(beatTime);
+    QDomElement beatCnt = doc.createElement("BeatCnt");
+    QDomText beatCntText = doc.createTextNode(QString((char *)param->beatCnt));
+    beatCnt.appendChild(beatCntText);
+    root.appendChild(beatCnt);
 
-    XMLElement *beatCnt = doc.NewElement("BeatCnt");
-    XMLText *docBeatCntText = doc.NewText((char*)param->beatCnt);
-    beatCnt->InsertEndChild(docBeatCntText);
-    root->InsertEndChild(beatCnt);
+    QDomElement deviceArea = doc.createElement("DeviceArea");
+    QDomText docDeviceAreaText = doc.createTextNode((char*)param->localArea);
+    deviceArea.appendChild(docDeviceAreaText);
+    root.appendChild(deviceArea);
 
-    XMLElement *deviceArea = doc.NewElement("DeviceArea");
-    XMLText *docDeviceAreaText = doc.NewText((char*)param->localArea);
-    deviceArea->InsertEndChild(docDeviceAreaText);
-    root->InsertEndChild(deviceArea);
-
-    XMLElement *mediaPort = doc.NewElement("MediaPort");
-    XMLText *docMediaPortText = doc.NewText((char*)param->mediaPort);
-    mediaPort->InsertEndChild(docMediaPortText);
-    root->InsertEndChild(mediaPort);
+    QDomElement mediaPort = doc.createElement("MediaPort");
+    QDomText docMediaPortText = doc.createTextNode((char*)param->mediaPort);
+    mediaPort.appendChild(docMediaPortText);
+    root.appendChild(mediaPort);
 
     if(param->protoType)
     {
-        XMLElement *passwd = doc.NewElement("Passwd");
-        XMLText *docPasswdText = doc.NewText((char*)param->passwd);
-        passwd->InsertEndChild(docPasswdText);
-        root->InsertEndChild(passwd);
+        QDomElement passwd = doc.createElement("Passwd");
+        QDomText docPasswdText = doc.createTextNode((char*)param->passwd);
+        passwd.appendChild(docPasswdText);
+        root.appendChild(passwd);
     }
     else {
-        XMLElement *path = doc.NewElement("Path");
-        XMLText *docPathText = doc.NewText((char*)param->path);
-        path->InsertEndChild(docPathText);
-        root->InsertEndChild(path);
+        QDomElement path = doc.createElement("Path");
+        QDomText docPathText = doc.createTextNode((char*)param->path);
+        path.appendChild(docPathText);
+        root.appendChild(path);
     }
-//    memcpy(xmlBuffer, doc.ToText(), strlen((char*)doc.ToText()));
-    XMLPrinter printer;
-    doc.Print( &printer );//将Print打印到Xmlprint类中 即保存在内存中
-    memcpy(xmlBuffer, printer.CStr(), printer.CStrSize());
+////    memcpy(xmlBuffer, doc.ToText(), strlen((char*)doc.ToText()));
+//    XMLPrinter printer;
+    memcpy(xmlBuffer, doc.toString().toStdString().c_str(), doc.toString().length());
 }
 
 void ConfigureGuide::SetConfigure(void* param)

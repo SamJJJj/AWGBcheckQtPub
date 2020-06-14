@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui\
+            xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 LIBS += -lpthread libwsock32 libws2_32
@@ -31,16 +32,14 @@ SOURCES += \
     ConfigureGuide.cpp \
     showcheckres.cpp \
     showthread.cpp \
-    showtree.cpp \
-    tinyxml2.cpp
+    showtree.cpp
 
 HEADERS += \
         AWGBCheckTool.h \
     AWQueue.h \
     ConfigureGuide.h \
     beanstalk.h \
-    main.h \
-    tinyxml2.h
+    main.h
 
 FORMS += \
         AWGBCheckTool.ui \
@@ -48,4 +47,4 @@ FORMS += \
 _ConfigureGuide.ui
         
 
-INCLUDEPATH += D:\Qt\myprojects\AWGBCheckTool
+INCLUDEPATH += D:\qt\qt\AWGBcheckQtPub
