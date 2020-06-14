@@ -1,4 +1,4 @@
-#include<QTextCursor>
+﻿#include<QTextCursor>
 #include <QMetaType>
 #include <QTextCursor>
 #include "AWGBCheckTool.h"
@@ -16,12 +16,12 @@ showThread::~showThread()
 void showThread::run()
 {
     int i = 0;
-    while(i < 30){
-        browser->append(QString("pppppppppppppppp"));
+    while(i < 30000){
+        browser->append(QString::number(i));
 //        QApplication::processEvents();
         i++;
         browser->moveCursor(QTextCursor::End);
-        Sleep(500);
+        Sleep(1000);
 
     }
     emit isDone();

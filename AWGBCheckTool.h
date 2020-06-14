@@ -8,55 +8,77 @@
 
 class AWGBCheckTool;
 
-class ShowTree: public QThread
-{
-    friend class AWGBCheckTool;
-    Q_OBJECT
-public:
-    explicit ShowTree(QObject * parent = 0);
-    ~ShowTree();
-    void setTreeView(QStandardItemModel *);
-protected:
-    void run();
-signals:
-    void showTree();
-private:
-    QStandardItemModel * treeModel;
-};
 
-class ShowCheckResThread: public QThread
+class GetAndParseThread : public QThread
 {
-    friend class AWGBCheckTool;
     Q_OBJECT
 public:
-    explicit ShowCheckResThread(QObject * parent = 0);
-    ~ShowCheckResThread();
-    void setTableView(QStandardItemModel *, int handle);
+    explicit GetAndParseThread(QObject * parent = 0);
+    ~GetAndParseThread();
+    void init(QStandardItemModel*, QStandardItemModel*, int);
 protected:
     void run();
 signals:
-    void showCheck();
+    void toTree();
+    void toTable();
+    void toText();
 private:
-    QStandardItemModel *checkResModel;
     int handle;
+    int tableId;
+    QStandardItemModel *checkResModel;
+    QStandardItemModel *treeModel;
+
 };
 
-class showThread: public QThread
-{
-    friend class AWGBCheckTool;
-    Q_OBJECT
-public:
-    explicit showThread(QObject * parent = 0);
-    ~showThread();
-    void setTextBrowser(QTextBrowser * );
-protected:
-    void run();
-signals:
-    void isDone();
-    void showSip();
-private:
-    QTextBrowser * browser;
-};
+//class ShowTree: public QThread
+//{
+//    friend class AWGBCheckTool;
+//    Q_OBJECT
+//public:
+//    explicit ShowTree(QObject * parent = 0);
+//    ~ShowTree();
+//    void setTreeView(QStandardItemModel *);
+//protected:
+//    void run();
+//signals:
+//    void showTree();
+//private:
+//    QStandardItemModel * treeModel;
+//};
+
+//class ShowCheckResThread: public QThread
+//{
+//    friend class AWGBCheckTool;
+//    Q_OBJECT
+//public:
+//    explicit ShowCheckResThread(QObject * parent = 0);
+//    ~ShowCheckResThread();
+//    void setTableView(QStandardItemModel *, int handle);
+//protected:
+//    void run();
+//signals:
+//    void showCheck();
+//private:
+//    QStandardItemModel *checkResModel;
+//    int handle;
+//};
+
+//class ShowThread: public QThread
+//{
+//    friend class AWGBCheckTool;
+//    Q_OBJECT
+//public:
+//    explicit ShowThread(QObject * parent = 0);
+//    ~ShowThread();
+//    void setTextBrowser(QTextBrowser * );
+//protected:
+//    void run();
+//signals:
+//    void isDone();
+//    void showSip();
+//private:
+//    QTextBrowser * browser;
+//};
 
 class AWGBCheckTool : public QMainWindow
 {
@@ -72,9 +94,7 @@ public:
     void showCheckRes();
 private:
 	Ui::AWGBCheckToolClass ui;
-    showThread *showT;
-    ShowCheckResThread *showCheckResT;
-    ShowTree *showTreeT;
+    GetAndParseThread *getThread;
     QStandardItemModel *treeModel;
     QStandardItemModel *checkResModel;
     int handle;

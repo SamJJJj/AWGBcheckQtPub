@@ -1,5 +1,6 @@
 ﻿#include "AWGBCheckTool.h"
 #include "ConfigureGuide.h"
+#include "AWQueue.h"
 #include <QListWidget>
 #include <QComboBox>
 #include <iostream>
@@ -9,28 +10,32 @@
 #include <QTextBrowser>
 
 using namespace std;
+
+
 AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
 	: QMainWindow(parent)
 {
     ui.setupUi(this);
     AWGBCheckTool::SetList(param);
     handle = h;
-//    QThread *thread = new QThread();
-    showT = new showThread;
-    showCheckResT = new ShowCheckResThread;
-    showTreeT = new ShowTree;
+    getThread = new GetAndParseThread;
     treeModel = new QStandardItemModel(ui.treeView);
     checkResModel = new QStandardItemModel(ui.tableView);
-//    ui.pushButton_6->setEnabled(false);
-//    ui.pushButton_7->setEnabled(false);
-
+    checkResModel->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("设备ID")));
+    checkResModel->setHorizontalHeaderItem(1, new QStandardItem(QObject::tr("设备类型")));
+    checkResModel->setHorizontalHeaderItem(2, new QStandardItem(QObject::tr("信令类型")));
+    checkResModel->setHorizontalHeaderItem(3, new QStandardItem(QObject::tr("状态")));
+    ui.tableView->setModel(checkResModel);
+    treeModel->setHorizontalHeaderLabels(QStringList() << QStringLiteral("Id(设备名)"));
+    ui.treeView->setModel(treeModel);
     ui.dateEdit->setCalendarPopup(true);
     ui.dateEdit_2->setCalendarPopup(true);
     ui.dateEdit->setDateTime(QDateTime::currentDateTime());
     ui.dateEdit_2->setDateTime(QDateTime::currentDateTime().addDays(365));
     ui.timeEdit_3->setTime(QTime::currentTime());
     ui.timeEdit_31->setTime(QTime::currentTime());
-
+    getThread->init(treeModel, checkResModel, h);
+    getThread->start();
     connect(ui.tableView_2->model(), &QStandardItemModel::dataChanged, this, &AWGBCheckTool::dataChangedSlot);
     connect(ui.pushButton_8, &QPushButton::clicked, this, &AWGBCheckTool::deviceRegister);
     connect(ui.pushButton_6, &QPushButton::clicked, this, &AWGBCheckTool::deviceCatalog);
@@ -38,8 +43,8 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(ui.pushButton_13, &QPushButton::clicked, this, &AWGBCheckTool::toListPage);
     connect(ui.pushButton, &QPushButton::clicked, this, &AWGBCheckTool::toVideoPage);
     connect(ui.pushButton_9, &QPushButton::clicked, this, &AWGBCheckTool::toSipPage);
-    connect(showTreeT, &ShowTree::showTree, this, &AWGBCheckTool::setTree);
-    connect(showCheckResT, &ShowCheckResThread::showCheck, this, &AWGBCheckTool::setCheckRes);
+    connect(getThread, &GetAndParseThread::toTree, this, &AWGBCheckTool::setTree);
+    connect(getThread, &GetAndParseThread::toTable, this, &AWGBCheckTool::setCheckRes);
     connect(ui.pushButton_7, &QPushButton::clicked, this, &AWGBCheckTool::prePage);
     connect(ui.pushButton_5, &QPushButton::clicked, this, &AWGBCheckTool::nextPage);
     connect(ui.pushButton_39, &QPushButton::clicked, this, &AWGBCheckTool::prePage);
@@ -48,9 +53,7 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
 
 AWGBCheckTool::~AWGBCheckTool()
 {
-    showT->terminate();
-    showCheckResT->terminate();
-    showTreeT->terminate();
+    getThread->terminate();
 }
 
 inline QString chooseModeType(int i)
@@ -335,21 +338,21 @@ void AWGBCheckTool::dataChangedSlot()
 
 void AWGBCheckTool::showST()
 {
-    showT->setTextBrowser(ui.textBrowser);
-    showT->start();
+//    showT->setTextBrowser(ui.textBrowser);
+//    showT->start();
 }
 
 
 void AWGBCheckTool::showCheckRes()
 {
-    showCheckResT->setTableView(checkResModel, handle);
-    showCheckResT->start();
+//    showCheckResT->setTableView(checkResModel, handle);
+//    showCheckResT->start();
 }
 
 void AWGBCheckTool::showTreeView()
 {
-    showTreeT->setTreeView(treeModel);
-    showTreeT->start();
+//    showTreeT->setTreeView(treeModel);
+//    showTreeT->start();
     connect(ui.treeView, &QTreeView::clicked, this, &AWGBCheckTool::showTreeInCurrentInterface);
     connect(ui.treeView, &QTreeView::clicked, this, [=]{ui.pushButton_8->setEnabled(false);});
 }
@@ -425,8 +428,11 @@ void AWGBCheckTool::deviceRegister()
         content->passwdLen = datatemp.toString().length();
     }
     cout << "copy ok" << endl;
-
-    //传给后端
+    char buf[1024] = {0};
+    int ret = 0;
+    makeDeviceInfoXml(content, buf, false);
+    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
+//    cout << ret << endl;
     free(content);
 }
 
