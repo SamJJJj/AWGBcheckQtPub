@@ -189,6 +189,7 @@ int ConfigureGuide::CheackLen(QString sttr)
         return 0;
     }
 }
+
 void ConfigureGuide::LineEditChange(){
     ui.LineEdit_9->setText(tr(""));
 }

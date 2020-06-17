@@ -16,9 +16,11 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
 	: QMainWindow(parent)
 {
     ui.setupUi(this);
+    seq = 0;
     AWGBCheckTool::SetList(param);
     handle = h;
     getThread = new GetAndParseThread;
+    udpReceiver = new RtpReciever;
     treeModel = new QStandardItemModel(ui.treeView);
     checkResModel = new QStandardItemModel(ui.tableView);
     checkResModel->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("设备ID")));
@@ -34,8 +36,10 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     ui.dateEdit_2->setDateTime(QDateTime::currentDateTime().addDays(365));
     ui.timeEdit_3->setTime(QTime::currentTime());
     ui.timeEdit_31->setTime(QTime::currentTime());
-    getThread->init(treeModel, checkResModel, h);
+    getThread->init(treeModel, checkResModel, h, &sipMessage);
     getThread->start();
+
+    ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     connect(ui.tableView_2->model(), &QStandardItemModel::dataChanged, this, &AWGBCheckTool::dataChangedSlot);
     connect(ui.pushButton_8, &QPushButton::clicked, this, &AWGBCheckTool::deviceRegister);
     connect(ui.pushButton_6, &QPushButton::clicked, this, &AWGBCheckTool::deviceCatalog);
@@ -45,15 +49,18 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(ui.pushButton_9, &QPushButton::clicked, this, &AWGBCheckTool::toSipPage);
     connect(getThread, &GetAndParseThread::toTree, this, &AWGBCheckTool::setTree);
     connect(getThread, &GetAndParseThread::toTable, this, &AWGBCheckTool::setCheckRes);
+    connect(getThread, &GetAndParseThread::toText, this, &AWGBCheckTool::setTextBrowser);
     connect(ui.pushButton_7, &QPushButton::clicked, this, &AWGBCheckTool::prePage);
     connect(ui.pushButton_5, &QPushButton::clicked, this, &AWGBCheckTool::nextPage);
     connect(ui.pushButton_39, &QPushButton::clicked, this, &AWGBCheckTool::prePage);
     connect(ui.pushButton_38, &QPushButton::clicked, this, &AWGBCheckTool::nextPage);
+    connect(ui.pushButton_24, &QPushButton::clicked, this, &AWGBCheckTool::playVideo);
 }
 
 AWGBCheckTool::~AWGBCheckTool()
 {
     getThread->terminate();
+    udpReceiver->stop();
 }
 
 inline QString chooseModeType(int i)
@@ -362,6 +369,7 @@ void AWGBCheckTool::showTreeInCurrentInterface()
     QModelIndex selected = ui.treeView->currentIndex();
     selected = selected.sibling(selected.row(),0);
     ui.lineEdit->setText(ui.treeView->model()->itemData(selected).values()[0].toString());
+    ui.lineEdit_3->setText(ui.treeView->model()->itemData(selected).values()[0].toString());
 }
 
 void AWGBCheckTool::deviceRegister()
@@ -509,5 +517,32 @@ void AWGBCheckTool::nextPage(){
         ui.stackedWidget_3->setMaximumHeight(112);
         ui.stackedWidget_3->setCurrentIndex(0);
         ui.stackedWidget_2->setCurrentIndex(1);
+    }
+}
+
+void AWGBCheckTool::setTextBrowser()
+{
+    ui.textBrowser->append(sipMessage[sipMessage.size() - 1]);
+//    ui.textBrowser->document()->toPlainText().indexOf();
+//    在所有中查找存放的，再movecursor
+    ui.textBrowser->moveCursor(QTextCursor::End);
+}
+
+void AWGBCheckTool::playVideo()
+{
+
+//先发给服务端参数，播放视频 根据类型启动线程。
+    switch (ui.comboBox_3->currentIndex()) {
+//      不同选项不同模式
+        case 0:
+//            cout << "udp" << endl;
+              udpReceiver->start();
+        break;
+        case 1:
+//            cout << "TCP 主动" << endl;
+        break;
+        case 2:
+//            cout << "TCP 被动" << endl;
+        break;
     }
 }
