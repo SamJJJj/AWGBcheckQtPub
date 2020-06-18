@@ -3,10 +3,14 @@
 #include <QtWidgets/QMainWindow>
 #include <QThread>
 #include <QStandardItemModel>
+#include "rtpreceiver.h"
+#include "tcpsocket.h"
 #include "ui_AWGBCheckTool.h"
 #include "main.h"
 
 class AWGBCheckTool;
+class RtpReciever;
+class TcpListener;
 
 
 class GetAndParseThread : public QThread
@@ -15,7 +19,7 @@ class GetAndParseThread : public QThread
 public:
     explicit GetAndParseThread(QObject * parent = 0);
     ~GetAndParseThread();
-    void init(QStandardItemModel*, QStandardItemModel*, int);
+    void init(QStandardItemModel*, QStandardItemModel*, int, QVector<QString> *);
 protected:
     void run();
 signals:
@@ -27,6 +31,7 @@ private:
     int tableId;
     QStandardItemModel *checkResModel;
     QStandardItemModel *treeModel;
+    QVector<QString> *sipMessages;
 
 };
 
@@ -95,8 +100,13 @@ public:
 private:
 	Ui::AWGBCheckToolClass ui;
     GetAndParseThread *getThread;
+    RtpReciever *udpReceiver;
+    TcpListener *tcpListener;
     QStandardItemModel *treeModel;
     QStandardItemModel *checkResModel;
+//    QHash<int, QString> sipMessage;
+    QVector<QString> sipMessage;
+    int seq;
     int handle;
     void SetList(pGBStart_s);
     void EndList();
@@ -115,4 +125,6 @@ private slots:
     void setCheckRes();
     void prePage();
     void nextPage();
+    void setTextBrowser();
+    void playVideo();
 };

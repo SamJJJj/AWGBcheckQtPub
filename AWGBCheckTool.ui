@@ -20,8 +20,8 @@
    <string>AWGBCheckTool</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="1">
+   <layout class="QHBoxLayout" name="horizontalLayout_25">
+    <item>
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="30,70">
       <property name="rightMargin">
        <number>0</number>
@@ -67,139 +67,115 @@
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>112</height>
+            <height>330</height>
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="page_6">
-           <widget class="QPushButton" name="pushButton_8">
+           <widget class="QWidget" name="verticalLayoutWidget">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>341</width>
+              <height>31</height>
+             </rect>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLabel" name="label_11">
+               <property name="text">
+                <string>当前通道</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEdit"/>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="verticalLayoutWidget_2">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>27</y>
+              <width>341</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QLabel" name="label_9">
+               <property name="text">
+                <string>当前检测项：</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_10">
+               <property name="text">
+                <string>（无）</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="verticalLayoutWidget_3">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>50</y>
-              <width>170</width>
-              <height>28</height>
+              <width>341</width>
+              <height>32</height>
              </rect>
             </property>
-            <property name="text">
-             <string>注册</string>
-            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QPushButton" name="pushButton_6">
+               <property name="text">
+                <string>目录查询</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_8">
+               <property name="text">
+                <string>注册</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
-           <widget class="QLabel" name="label_10">
-            <property name="geometry">
-             <rect>
-              <x>153</x>
-              <y>28</y>
-              <width>146</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>（无）</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pushButton_7">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>85</y>
-              <width>170</width>
-              <height>28</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>上一页</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_11">
+           <widget class="QWidget" name="verticalLayoutWidget_4">
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>5</y>
-              <width>60</width>
-              <height>21</height>
+              <y>80</y>
+              <width>341</width>
+              <height>31</height>
              </rect>
             </property>
-            <property name="text">
-             <string>当前通道</string>
-            </property>
-           </widget>
-           <widget class="QLineEdit" name="lineEdit">
-            <property name="geometry">
-             <rect>
-              <x>66</x>
-              <y>5</y>
-              <width>280</width>
-              <height>21</height>
-             </rect>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pushButton_5">
-            <property name="geometry">
-             <rect>
-              <x>176</x>
-              <y>85</y>
-              <width>170</width>
-              <height>28</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>下一页</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pushButton_6">
-            <property name="geometry">
-             <rect>
-              <x>176</x>
-              <y>50</y>
-              <width>170</width>
-              <height>28</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>目录查询</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_9">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>28</y>
-              <width>146</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>当前检测项：</string>
-            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_21">
+             <item>
+              <widget class="QPushButton" name="pushButton_7">
+               <property name="text">
+                <string>上一页</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_5">
+               <property name="text">
+                <string>下一页</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </widget>
           <widget class="QWidget" name="page_7">
-           <widget class="QLineEdit" name="lineEdit_3">
-            <property name="geometry">
-             <rect>
-              <x>70</x>
-              <y>0</y>
-              <width>280</width>
-              <height>21</height>
-             </rect>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_12">
-            <property name="geometry">
-             <rect>
-              <x>4</x>
-              <y>0</y>
-              <width>60</width>
-              <height>21</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>当前通道</string>
-            </property>
-           </widget>
            <widget class="QGroupBox" name="groupBox_2">
             <property name="geometry">
              <rect>
@@ -218,32 +194,6 @@
             <property name="title">
              <string>回放</string>
             </property>
-            <widget class="QLabel" name="label">
-             <property name="geometry">
-              <rect>
-               <x>20</x>
-               <y>20</y>
-               <width>72</width>
-               <height>21</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>开始：</string>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_2">
-             <property name="geometry">
-              <rect>
-               <x>20</x>
-               <y>40</y>
-               <width>72</width>
-               <height>21</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>结束：</string>
-             </property>
-            </widget>
             <widget class="QLabel" name="label_3">
              <property name="geometry">
               <rect>
@@ -498,72 +448,116 @@
               <string>秒</string>
              </property>
             </widget>
-            <widget class="QDateEdit" name="dateEdit">
+            <widget class="QWidget" name="verticalLayoutWidget_7">
              <property name="geometry">
               <rect>
-               <x>60</x>
+               <x>20</x>
                <y>20</y>
-               <width>110</width>
-               <height>22</height>
+               <width>291</width>
+               <height>23</height>
               </rect>
              </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_23">
+              <item>
+               <widget class="QLabel" name="label">
+                <property name="maximumSize">
+                 <size>
+                  <width>45</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>开始：</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDateEdit" name="dateEdit"/>
+              </item>
+              <item>
+               <widget class="QTimeEdit" name="timeEdit_3"/>
+              </item>
+             </layout>
             </widget>
-            <widget class="QDateEdit" name="dateEdit_2">
+            <widget class="QWidget" name="verticalLayoutWidget_8">
              <property name="geometry">
               <rect>
-               <x>60</x>
+               <x>20</x>
                <y>40</y>
-               <width>110</width>
-               <height>22</height>
+               <width>291</width>
+               <height>23</height>
               </rect>
              </property>
-            </widget>
-            <widget class="QTimeEdit" name="timeEdit_3">
-             <property name="geometry">
-              <rect>
-               <x>190</x>
-               <y>20</y>
-               <width>110</width>
-               <height>22</height>
-              </rect>
-             </property>
-            </widget>
-            <widget class="QTimeEdit" name="timeEdit_3">
-             <property name="geometry">
-              <rect>
-               <x>190</x>
-               <y>40</y>
-               <width>110</width>
-               <height>22</height>
-              </rect>
-             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_26">
+              <item>
+               <widget class="QLabel" name="label_2">
+                <property name="maximumSize">
+                 <size>
+                  <width>45</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>结束：</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDateEdit" name="dateEdit_2"/>
+              </item>
+              <item>
+               <widget class="QTimeEdit" name="timeEdit_3"/>
+              </item>
+             </layout>
             </widget>
            </widget>
-           <widget class="QPushButton" name="pushButton_38">
-            <property name="geometry">
-             <rect>
-              <x>176</x>
-              <y>300</y>
-              <width>170</width>
-              <height>28</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>下一页</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pushButton_39">
+           <widget class="QWidget" name="verticalLayoutWidget_5">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>300</y>
-              <width>170</width>
-              <height>28</height>
+              <width>351</width>
+              <height>30</height>
              </rect>
             </property>
-            <property name="text">
-             <string>上一页</string>
+            <layout class="QHBoxLayout" name="horizontalLayout_22">
+             <item>
+              <widget class="QPushButton" name="pushButton_39">
+               <property name="text">
+                <string>上一页</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_38">
+               <property name="text">
+                <string>下一页</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="verticalLayoutWidget_6">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>341</width>
+              <height>23</height>
+             </rect>
             </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_24">
+             <item>
+              <widget class="QLabel" name="label_12">
+               <property name="text">
+                <string>当前通道</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEdit_3"/>
+             </item>
+            </layout>
            </widget>
           </widget>
          </widget>
@@ -612,7 +606,7 @@
         <item>
          <widget class="QStackedWidget" name="stackedWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="page">
            <layout class="QGridLayout" name="gridLayout_5">
@@ -734,6 +728,13 @@
                     </property>
                    </widget>
                   </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_35">
+                    <property name="text">
+                     <string>👇</string>
+                    </property>
+                   </widget>
+                  </item>
                  </layout>
                 </item>
                 <item>
@@ -756,11 +757,29 @@
                 </item>
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_19">
-                  <item alignment="Qt::AlignHCenter">
-                   <widget class="QPushButton" name="pushButton_35">
-                    <property name="text">
-                     <string>👇</string>
+                  <item>
+                   <widget class="QComboBox" name="comboBox_3">
+                    <property name="maximumSize">
+                     <size>
+                      <width>80</width>
+                      <height>25</height>
+                     </size>
                     </property>
+                    <item>
+                     <property name="text">
+                      <string>UDP</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>TCP主动</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>TCP被动</string>
+                     </property>
+                    </item>
                    </widget>
                   </item>
                  </layout>
