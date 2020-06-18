@@ -12,6 +12,7 @@
 #include "jrtplib3/rtptcptransmitter.h"
 #include "jrtplib3/rtptcpaddress.h"
 
+
 using namespace jrtplib;
 using namespace std;
 //#define RTP_SUPPORT_THREAD
@@ -237,8 +238,13 @@ void TcpListener::run() {
                             int cameraId = ssrc - 100000000;
                             cout << cameraId <<endl;
                             cout << 123 << endl;
-        //					channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
+//                            VideoChannel* channel = NULL;
 
+
+//                            if (channel != nullptr)
+//                            {
+//                                channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
+//                            }
 
 
                             // we don't longer need the packet, so
@@ -337,7 +343,7 @@ void TcpListener::run() {
                             cout << 7 <<endl;
                             cout << cameraId <<endl;
                             cout << 123 << endl;
-        //					channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
+//        					channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
 
 
 

@@ -4,9 +4,10 @@
 #include <QThread>
 #include <QStandardItemModel>
 #include "rtpreceiver.h"
-#include "tcpsocket.h"
 #include "ui_AWGBCheckTool.h"
 #include "main.h"
+#include "tcpsocket.h"
+#include "showvideo.h"
 
 class AWGBCheckTool;
 class RtpReciever;
@@ -103,6 +104,7 @@ private:
     RtpReciever *udpReceiver;
     TcpListener *tcpListener;
     QStandardItemModel *treeModel;
+    ShowVideo* video;
     QStandardItemModel *checkResModel;
 //    QHash<int, QString> sipMessage;
     QVector<QString> sipMessage;

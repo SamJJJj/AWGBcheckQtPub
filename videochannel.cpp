@@ -37,6 +37,7 @@ VideoChannel::VideoChannel()
     mH264buf = nullptr;
 
     mVideoChannelEventHandle = nullptr;
+
 }
 
 VideoChannel::~VideoChannel()
