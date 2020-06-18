@@ -149,6 +149,7 @@ RtpReciever::RtpReciever()
 {
     mIsStop = true;
     mIsThreadRunning = false;
+    channel = new VideoChannel;
 }
 
 RtpReciever::~RtpReciever()
@@ -159,6 +160,7 @@ RtpReciever::~RtpReciever()
 void RtpReciever::start()
 {
     mIsStop = false;
+    channel->start();
     //启动新的线程实现读取视频文件
     std::thread([&](RtpReciever *pointer)
     {
@@ -242,7 +244,7 @@ void RtpReciever::run()
                 {
 
                     RTPSourceData *mRTPSourceData = sess.GetCurrentSourceInfo();
-                    std::cout << "get data!" << std::endl;
+//                    std::cout << "get data!" << std::endl;
                     uint32_t ssrc = mRTPSourceData->GetSSRC();
                     if (ssrcbay == 0) {
                         ssrcbay = ssrc;
@@ -252,7 +254,7 @@ void RtpReciever::run()
 //                    int cameraId = ssrc-100000000; //这里的ssrc就是cameraId 在invite的时候传给相机的
 
 //                    VideoChannel* channel = AppConfig::gGB28181Server->getVideoChannel(cameraId);
-
+//                      也要通过cameraId联系起来
 
 //fprintf(stderr,"%s 111 ssrc=%d %d channel=%d\n", __FUNCTION__, ssrc, cameraId, channel);
 
@@ -263,8 +265,9 @@ void RtpReciever::run()
                             break;
                         }
                         ///////////////////////////////////////
-                        //将buffer传给解析器
-//                        channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
+                        //将buffer传给解析器，这里以后要传一个特殊的channel区分设备
+                        //因为以后可能有多个channel同时接收
+                        channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
 //                    }
 
                     // we don't longer need the packet, so

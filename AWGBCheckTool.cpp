@@ -23,6 +23,7 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     udpReceiver = new RtpReciever;
     treeModel = new QStandardItemModel(ui.treeView);
     checkResModel = new QStandardItemModel(ui.tableView);
+    video = new ShowVideo(ui.openGLWidget);
     checkResModel->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("设备ID")));
     checkResModel->setHorizontalHeaderItem(1, new QStandardItem(QObject::tr("设备类型")));
     checkResModel->setHorizontalHeaderItem(2, new QStandardItem(QObject::tr("信令类型")));
@@ -61,6 +62,7 @@ AWGBCheckTool::~AWGBCheckTool()
 {
     getThread->terminate();
     udpReceiver->stop();
+    delete video;
 }
 
 inline QString chooseModeType(int i)
@@ -530,13 +532,16 @@ void AWGBCheckTool::setTextBrowser()
 
 void AWGBCheckTool::playVideo()
 {
-
 //先发给服务端参数，播放视频 根据类型启动线程。
+    //要先让服务器发送invite
     switch (ui.comboBox_3->currentIndex()) {
 //      不同选项不同模式
         case 0:
 //            cout << "udp" << endl;
+              udpReceiver->channel->setEventHandle(video);
               udpReceiver->start();
+              video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
+              ui.pushButton_24->setEnabled(false);
         break;
         case 1:
 //            cout << "TCP 主动" << endl;

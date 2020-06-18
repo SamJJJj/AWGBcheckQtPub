@@ -6,6 +6,7 @@
 #include "rtpreceiver.h"
 #include "ui_AWGBCheckTool.h"
 #include "main.h"
+#include "showvideo.h"
 
 class AWGBCheckTool;
 class RtpReciever;
@@ -100,6 +101,7 @@ private:
     GetAndParseThread *getThread;
     RtpReciever *udpReceiver;
     QStandardItemModel *treeModel;
+    ShowVideo* video;
     QStandardItemModel *checkResModel;
 //    QHash<int, QString> sipMessage;
     QVector<QString> sipMessage;

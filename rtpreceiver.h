@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <iostream>
+#include "videochannel.h"
 
 #define MEDIASERVER_RTP_PORT 9000
 
@@ -16,11 +17,10 @@ public:
     void start();
 
     void stop(bool isWait = false);
-
+    VideoChannel *channel;  //后面不应该是这种方式
 protected:
     bool mIsStop;
     bool mIsThreadRunning;
-
     void run();
 
 public:
