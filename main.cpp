@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     int handle;
     int ret;
 //    pro->start("beanstalkd.exe -l 127.0.0.1 -p 11300");
-    ret = AW_BSQueue_Init(&handle, (unsigned char *)"192.168.0.99", 0, (unsigned char *)"Server",(unsigned char *)"Client");
+    ret = AW_BSQueue_Init(&handle, (unsigned char *)"127.0.0.1", 0, (unsigned char *)"Server",(unsigned char *)"Client");
     if(ret == 0)
         cout << "init OK" << endl;
 	QApplication a(argc, argv);

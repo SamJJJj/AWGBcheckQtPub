@@ -205,7 +205,7 @@ void RtpReciever::run()
     sessparams.SetUsePollThread(true);
 
     int rtpPort = MEDIASERVER_RTP_PORT;
-    portbase = 9000;
+    portbase = 10010;
     transparams.SetRTPReceiveBuffer(1024 * 1024 *100); //100M
 
     sessparams.SetAcceptOwnPackets(true);

@@ -129,4 +129,5 @@ private slots:
     void nextPage();
     void setTextBrowser();
     void playVideo();
+    void stopVideo();
 };

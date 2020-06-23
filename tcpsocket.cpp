@@ -32,6 +32,7 @@ TcpListener::TcpListener()
     mIsStop = true;
     mIsThreadRunning = false;
     activeIp = new char[15];
+    channel = new VideoChannel;
     sClient = NULL;
 }
 
@@ -43,6 +44,7 @@ TcpListener::~TcpListener()
 void TcpListener::start()
 {
     mIsStop = false;
+    channel->start();
     //�����µ��߳�ʵ�ֶ�ȡ��Ƶ�ļ�
     std::thread([&](TcpListener *pointer)
     {
@@ -177,7 +179,6 @@ void TcpListener::run() {
         while (sign) {
             cout << "pro" << endl;
             sClient = accept(slisten, (SOCKADDR *)&remoteAddr, &nAddrlen);
-            cout << "link_start" << endl;
             if (sClient == INVALID_SOCKET) {
 //                qDebug("Can't accept incoming connection!");
                 return;
@@ -207,50 +208,37 @@ void TcpListener::run() {
             checkerror(sess2.Create(sessParams, &trans2));
             qDebug("Session 2 created ");
             checkerror(sess2.AddDestination(RTPTCPAddress(sClient)));
-            cout<< 5 <<endl;
         //    std::vector<uint8_t> pack(packSize);
-            cout << "one sleep" <<endl;
-            int w = 0;
+            uint32_t ssrcbay = 0;
             while (1)
             {
-                Sleep(1000);
-                sess2.Poll();
+//                sess2.Poll();
 //                w++;
 //                cout << w <<endl;
                 //mIsStop = true;
                 sess2.BeginDataAccess();
-                int e = sess2.GotoFirstSourceWithData();
-                cout << e <<endl;
                 if (sess2.GotoFirstSourceWithData())
                 {
                     do
                     {
-                        Sleep(1000);
-                        cout << 3 <<endl;
                         RTPPacket *pack;
 
                         while ((pack = sess2.GetNextPacket()) != NULL)
                         {
-                            Sleep(1000);
-                            cout << 4 <<endl;
                             RTPSourceData *mRTPSourceData = sess2.GetCurrentSourceInfo();
                             uint32_t ssrc = mRTPSourceData->GetSSRC();
-                            int cameraId = ssrc - 100000000;
-                            cout << cameraId <<endl;
-                            cout << 123 << endl;
-//                            VideoChannel* channel = NULL;
-
-
-//                            if (channel != nullptr)
-//                            {
-//                                channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
-//                            }
-
-
-                            // we don't longer need the packet, so
-                            // we'll delete it
+                            if (ssrcbay == 0) {
+                                ssrcbay = ssrc;
+                            }
+//                                if (mIsStop == 1) {
+//                                    break;
+//                                }
+                            cout<<123<<endl;
+                            channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
                             sess2.DeletePacket(pack);
-                            cout << "two sleep" <<endl;
+
+
+
                         }
                     } while (sess2.GotoNextSourceWithData());
                 }
@@ -310,15 +298,12 @@ void TcpListener::run() {
             checkerror(sess2.Create(sessParams, &trans2));
             qDebug("Session 2 created ");
             checkerror(sess2.AddDestination(RTPTCPAddress(slisten)));
-            cout<< 5 <<endl;
         //    std::vector<uint8_t> pack(packSize);
-            Sleep(1000);
-            cout << "one sleep" <<endl;
+//            cout << "one sleep" <<endl;
             //这是一个循环
             while (1)
             //这是第一个循环的左大括号
             {
-                Sleep(1000);
                 sess2.Poll();
                 cout << 2 <<endl;
                 //mIsStop = true;
@@ -327,8 +312,6 @@ void TcpListener::run() {
                 {
                     do
                     {
-                        Sleep(1000);
-                        cout << 3 <<endl;
                         RTPPacket *pack;
 
                         while ((pack = sess2.GetNextPacket()) != NULL)

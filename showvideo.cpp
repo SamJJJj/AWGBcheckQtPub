@@ -1,4 +1,5 @@
 #include "ShowVideo.h"
+#include <synchapi.h>
 
 #include <QPainter>
 
@@ -63,6 +64,7 @@ void ShowVideo::onDisPlayVideoData(const uint8_t *rgb32Buffer, const int bufferS
     QImage tmpImg((uchar *)rgb32Buffer, width, height, QImage::Format_RGB32);
     //  QImage image = tmpImg.copy(); //把图像复制一份 传递给界面显示
     QImage image = tmpImg.convertToFormat(QImage::Format_RGB888, Qt::NoAlpha); //去掉透明的部分 有些奇葩的视频会透明
+    Sleep(40);
 
     emit sig_DisPlayVideo(image);
 

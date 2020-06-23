@@ -9,6 +9,7 @@
 #include <vector>
 #include <QDebug>
 #include "jrtplib3/rtptcpaddress.h"
+#include "videochannel.h"
 using namespace jrtplib;
 class TcpListener{
 public:
@@ -21,6 +22,7 @@ public:
     int sign;
     int activePort;
     char *activeIp;
+    VideoChannel *channel;  //后面不应该是这种方式
 protected:
     bool mIsStop;
     bool mIsThreadRunning;

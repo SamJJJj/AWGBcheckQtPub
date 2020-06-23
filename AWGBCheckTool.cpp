@@ -8,6 +8,8 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QTextBrowser>
+#include <QtXml/QDomComment>
+#include <QtXml/QDomElement>
 
 using namespace std;
 
@@ -57,6 +59,7 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(ui.pushButton_39, &QPushButton::clicked, this, &AWGBCheckTool::prePage);
     connect(ui.pushButton_38, &QPushButton::clicked, this, &AWGBCheckTool::nextPage);
     connect(ui.pushButton_24, &QPushButton::clicked, this, &AWGBCheckTool::playVideo);
+    connect(ui.pushButton_25, &QPushButton::clicked, this, &AWGBCheckTool::stopVideo);
 }
 
 AWGBCheckTool::~AWGBCheckTool()
@@ -531,10 +534,58 @@ void AWGBCheckTool::setTextBrowser()
     ui.textBrowser->moveCursor(QTextCursor::End);
 }
 
+
+
+void makeDeviceInviteXml(QString param, char *xmlBuffer)
+{
+    QDomDocument doc;
+    QDomElement root=doc.createElement("Request");
+    doc.appendChild(root);
+
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("Invite");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+
+    QDomElement deviceType = doc.createElement("DeviceType");
+    QDomText deviceTypeText = doc.createTextNode(param);
+    deviceType.appendChild(deviceTypeText);
+    root.appendChild(deviceType);
+//    XMLPrinter printer;
+    memcpy(xmlBuffer, doc.toString().toStdString().c_str(), doc.toString().length());
+}
+
+void makeDeviceStopXml(QString param, char *xmlBuffer)
+{
+    QDomDocument doc;
+    QDomElement root=doc.createElement("Request");
+    doc.appendChild(root);
+
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("BYE");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+
+    QDomElement deviceType = doc.createElement("DeviceType");
+    QDomText deviceTypeText = doc.createTextNode(param);
+    deviceType.appendChild(deviceTypeText);
+    root.appendChild(deviceType);
+//    XMLPrinter printer;
+    memcpy(xmlBuffer, doc.toString().toStdString().c_str(), doc.toString().length());
+}
+
+
+
+
 void AWGBCheckTool::playVideo()
 {
 //先发给服务端参数，播放视频 根据类型启动线程。
     //要先让服务器发送invite
+
+    char sendBuf[2048] = {0};
+    QString deId = ui.lineEdit->text();
+    makeDeviceInviteXml(deId, sendBuf);
+    int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
     switch (ui.comboBox_3->currentIndex()) {
 //      不同选项不同模式
         case 0:
@@ -546,13 +597,32 @@ void AWGBCheckTool::playVideo()
         break;
         case 1:
             tcpListener->connectType = 1;
+            tcpListener->channel->setEventHandle(video);
             tcpListener->start();
+            video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
+            ui.pushButton_24->setEnabled(false);
 //            cout << "TCP 主动" << endl;
         break;
         case 2:
             tcpListener->connectType = 2;
+            tcpListener->channel->setEventHandle(video);
             tcpListener->start();
+            video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
+            ui.pushButton_24->setEnabled(false);
 //            cout << "TCP 被动" << endl;
         break;
     }
+}
+
+void AWGBCheckTool::stopVideo(){
+    char sendBuf[2048] = {0};
+    QString deId = ui.lineEdit->text();
+    makeDeviceStopXml(deId, sendBuf);
+    int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
+    tcpListener->stop();
+    udpReceiver->stop();
+    video->clear();
+    tcpListener->channel->stop();
+    udpReceiver->channel->stop();
+    ui.pushButton_24->setEnabled(true);
 }
