@@ -126,12 +126,12 @@ void DataListThread<T>::run()
             Sleep(100);
             continue;
         }
-
-        T node = mList.front();
-        mList.pop_front();
-        mCondition->Unlock();
-
-        dealwithDataNode(node);
+        else {
+                T node = mList.front();
+                mList.pop_front();
+                mCondition->Unlock();
+                dealwithDataNode(node);
+        }
     }
 
     mList.clear(); //清空队列

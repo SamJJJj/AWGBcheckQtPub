@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QTextBrowser>
+#include <QTextBlock>
 
 using namespace std;
 
@@ -28,6 +29,7 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     checkResModel->setHorizontalHeaderItem(1, new QStandardItem(QObject::tr("设备类型")));
     checkResModel->setHorizontalHeaderItem(2, new QStandardItem(QObject::tr("信令类型")));
     checkResModel->setHorizontalHeaderItem(3, new QStandardItem(QObject::tr("状态")));
+    ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui.tableView->setModel(checkResModel);
     treeModel->setHorizontalHeaderLabels(QStringList() << QStringLiteral("Id(设备名)"));
     ui.treeView->setModel(treeModel);
@@ -49,13 +51,14 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(ui.pushButton, &QPushButton::clicked, this, &AWGBCheckTool::toVideoPage);
     connect(ui.pushButton_9, &QPushButton::clicked, this, &AWGBCheckTool::toSipPage);
     connect(getThread, &GetAndParseThread::toTree, this, &AWGBCheckTool::setTree);
-    connect(getThread, &GetAndParseThread::toTable, this, &AWGBCheckTool::setCheckRes);
+    connect(getThread, &GetAndParseThread::toText, this, &AWGBCheckTool::setCheckRes);
     connect(getThread, &GetAndParseThread::toText, this, &AWGBCheckTool::setTextBrowser);
     connect(ui.pushButton_7, &QPushButton::clicked, this, &AWGBCheckTool::prePage);
     connect(ui.pushButton_5, &QPushButton::clicked, this, &AWGBCheckTool::nextPage);
     connect(ui.pushButton_39, &QPushButton::clicked, this, &AWGBCheckTool::prePage);
     connect(ui.pushButton_38, &QPushButton::clicked, this, &AWGBCheckTool::nextPage);
     connect(ui.pushButton_24, &QPushButton::clicked, this, &AWGBCheckTool::playVideo);
+    connect(ui.tableView, &QTableView::clicked, this, &AWGBCheckTool::gotoMatchBuffer);
 }
 
 AWGBCheckTool::~AWGBCheckTool()
@@ -525,9 +528,9 @@ void AWGBCheckTool::nextPage(){
 void AWGBCheckTool::setTextBrowser()
 {
     ui.textBrowser->append(sipMessage[sipMessage.size() - 1]);
-//    ui.textBrowser->document()->toPlainText().indexOf();
-//    在所有中查找存放的，再movecursor
     ui.textBrowser->moveCursor(QTextCursor::End);
+    QTextCursor cursor = ui.textBrowser->textCursor();
+    cursor.insertBlock();
 }
 
 void AWGBCheckTool::playVideo()
@@ -550,4 +553,13 @@ void AWGBCheckTool::playVideo()
 //            cout << "TCP 被动" << endl;
         break;
     }
+}
+
+void AWGBCheckTool::gotoMatchBuffer()
+{
+    int row = ui.tableView->currentIndex().row();
+    QTextCursor tc = ui.textBrowser->textCursor();
+    int position = ui.textBrowser->document()->findBlockByNumber ( row-1 ).position();
+    tc.setPosition(position,QTextCursor::MoveAnchor);
+    ui.textBrowser->setTextCursor(tc);
 }

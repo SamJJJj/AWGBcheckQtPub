@@ -37,7 +37,7 @@ void GetAndParseThread::run()
     QTextStream streamJudge(&str);
     while(1)
     {
-        Sleep(1000);
+        Sleep(500);
         ret = AW_BSQueue_GetBuffer(handle, buf, &len);
         if(!ret)
         {
@@ -52,22 +52,31 @@ void GetAndParseThread::run()
                 QTextStream streamText(&text);
                 list = doc.elementsByTagName("Buffer");
                 list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
-//                QDomNodeList list1 = doc.elementsByTagName("CheckKey");
-//                QString textKey;
-//                QTextStream streamKey(&textKey);
-//                list1.at(0).toElement().childNodes().at(0).toText().save(streamKey, 0);
                 sipMessages->append(text);
+                text.clear();
                 str.clear();
+                list = doc.elementsByTagName("DeviceId");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                checkResModel->setItem(tableId, 0, new QStandardItem(text));
+                text.clear();
+                list = doc.elementsByTagName("DeviceType");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                checkResModel->setItem(tableId, 1, new QStandardItem(text));
+                text.clear();
+                list = doc.elementsByTagName("SipType");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                checkResModel->setItem(tableId, 2, new QStandardItem(text));
+                text.clear();
+                list = doc.elementsByTagName("State");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                checkResModel->setItem(tableId, 3, new QStandardItem(text));
+                ++tableId;
                 emit toText();
-//                emit toTable();
             }
             else if(str == QString("DeviceTree"))
             {
                 emit toTree();
             }
-
-//            sipMessages->append();
-//            checkResModel->setItemData();
             memset(buf, 0, 2048);
             len = INT_MAX;
         }

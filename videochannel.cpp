@@ -4,7 +4,9 @@
 #include "rtpreceiver.h"
 #include "EventHandle.h"
 #include <sys/time.h>
+#include <iostream>
 
+using namespace std;
 #define MAX_PS_BUFFER_SIZE 2048000
 #define H264_FRAME_SIZE_MAX (1024*1024*2)
 
@@ -35,8 +37,8 @@ VideoChannel::VideoChannel()
     numBytes_rgb = 0;
 
     mH264buf = nullptr;
-
     mVideoChannelEventHandle = nullptr;
+    av_register_all();
 
 }
 
@@ -269,8 +271,10 @@ bool VideoChannel::openH264Decoder()
     //        qDebug("Codec not found.\n");
             return false;
         }
-
         pCodecCtx->thread_count = 8;
+        pCodecCtx->thread_type = FF_THREAD_FRAME;
+//        pCodecCtx->time_base.num = 1;
+//        pCodecCtx->time_base.den = 30;
 
         ///打开解码器
         if (avcodec_open2(pCodecCtx, pCodec, NULL) < 0) {
@@ -285,7 +289,6 @@ bool VideoChannel::openH264Decoder()
     }
 
     pFrame = av_frame_alloc();
-
     av_init_packet(&packet);
 
 
@@ -318,13 +321,14 @@ void VideoChannel::decodeH264Buffer(uint8_t *buffer, int size, bool isLostPacket
 {
     packet.data = buffer;
     packet.size = size;
+//    AVRational raw_time_rate = av_inv_q(pCodecCtx->framerate);
+//    av_packet_rescale_ts(&packet, AVRational(),raw_time_rate);
 
     if (avcodec_send_packet(pCodecCtx, &packet) != 0)
     {
        fprintf(stderr, "input AVPacket to decoder failed!\n");
        return;
     }
-
     while (0 == avcodec_receive_frame(pCodecCtx, pFrame))
     {
         ///判断解码完毕的帧是否是关键帧
