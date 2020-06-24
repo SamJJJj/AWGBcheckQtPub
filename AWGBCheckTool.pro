@@ -5,7 +5,8 @@
 #-------------------------------------------------
 
 QT       += core gui\
-            xml
+            xml\
+            network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 LIBS += libws2_32 libAdvapi32 -lpthread libwsock32
@@ -35,6 +36,7 @@ SOURCES += \
     mutex.cpp \
     rtpreceiver.cpp \
     showvideo.cpp \
+    tcpsocket.cpp \
     videochannel.cpp
 
 HEADERS += \
@@ -220,6 +222,7 @@ HEADERS += \
     mutex.h \
     rtpreceiver.h \
     showvideo.h \
+    tcpsocket.h \
     videochannel.h
 
 FORMS += \

@@ -200,7 +200,7 @@ void RtpReciever::run()
 
     RTPUDPv4TransmissionParams transparams;
     RTPSessionParams sessparams;
-
+    //解析帧数
     sessparams.SetOwnTimestampUnit(1.0 / 9000.0);
     sessparams.SetUsePollThread(true);
 

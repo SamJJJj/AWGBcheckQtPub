@@ -437,7 +437,7 @@ void ConfigureGuide::SetConfigure(void* param)
     char sendBuf[2048] = {0};
     makeDeviceInfoXml(res, sendBuf, true);
     ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
-//    cout << "put:" << ret << endl;
+    cout << "put:" << ret << endl;
     AWGBCheckTool *IC = new AWGBCheckTool(Q_NULLPTR, res, handle);
     IC->setAttribute(Qt::WA_DeleteOnClose);
     IC->show();

@@ -143,7 +143,6 @@ void VideoChannel::dealwithDataNode(const RtpDataNode &node)
             }
         }
     }
-
     free(node.buffer);
 }
 

@@ -4,6 +4,8 @@
 #include <thread>
 #include <list>
 #include <synchapi.h>
+#include <sys/time.h>
+#include <iostream>
 #include "Cond.h"
 
 
@@ -26,6 +28,7 @@ public:
     int inputData(const T &node);
 
     void clearData();
+    int64_t getTimeStamp_MilliSecond1();
 
 protected:
     bool mIsStop;
@@ -107,23 +110,52 @@ void DataListThread<T>::clearData()
     mList.clear();
     mCondition->Unlock();
 }
+template<typename T>
+int64_t DataListThread<T>::getTimeStamp_MilliSecond1()
+{
+    int mSecond = 0; //当前毫秒数
+
+//#if defined(WIN32)
+
+//    SYSTEMTIME sys;
+//    GetLocalTime(&sys);
+//    mSecond = sys.wMilliseconds;
+//#else
+
+    struct timeval    tv;
+    struct timezone tz;
+
+    struct tm         *p;
+
+    gettimeofday(&tv, &tz);
+    p = localtime(&tv.tv_sec);
+
+    mSecond = tv.tv_usec / 1000;
+
+
+//#endif
+    int64_t timeStamp = ((int64_t)time(NULL)) * 1000 + mSecond;
+
+    return timeStamp;
+
+}
 
 template<typename T>
 void DataListThread<T>::run()
 {
     mIsThreadRunning = true;
-
     threadStart();
 
     while(!mIsStop)
     {
+//        int64_t start = getTimeStamp_MilliSecond1();
         mCondition->Lock();
 
         if (mList.size() <= 0)
         {
             mCondition->Unlock();
-            //要睡。。
-            Sleep(100);
+//            //要睡。。
+//            Sleep(100);
             continue;
         }
         else {
@@ -131,6 +163,8 @@ void DataListThread<T>::run()
                 mList.pop_front();
                 mCondition->Unlock();
                 dealwithDataNode(node);
+                int64_t end = getTimeStamp_MilliSecond1();
+                std::cout << end % 1000 << " dealed" << std::endl;
         }
     }
 

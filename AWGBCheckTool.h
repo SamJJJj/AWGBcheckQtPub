@@ -3,7 +3,9 @@
 #include <QtWidgets/QMainWindow>
 #include <QThread>
 #include <QStandardItemModel>
+#include <QProcess>
 #include "rtpreceiver.h"
+#include "tcpsocket.h"
 #include "ui_AWGBCheckTool.h"
 #include "main.h"
 #include "showvideo.h"
@@ -18,19 +20,24 @@ class GetAndParseThread : public QThread
 public:
     explicit GetAndParseThread(QObject * parent = 0);
     ~GetAndParseThread();
-    void init(QStandardItemModel*, QStandardItemModel*, int, QVector<QString> *);
+    void init(QStandardItemModel*, QStandardItemModel*, int, QString *, QString *, QString *, QString *, QString *);
 protected:
     void run();
 signals:
     void toTree();
     void toTable();
     void toText();
+    void push();
 private:
     int handle;
     int tableId;
+    QString *ip;
+    QString *port;
+    QString *pushMethod;
+    QString *pushId;
     QStandardItemModel *checkResModel;
     QStandardItemModel *treeModel;
-    QVector<QString> *sipMessages;
+    QString *sipMessages;
 
 };
 
@@ -100,11 +107,17 @@ private:
 	Ui::AWGBCheckToolClass ui;
     GetAndParseThread *getThread;
     RtpReciever *udpReceiver;
+    TcpListener *tcpListener;
     QStandardItemModel *treeModel;
     ShowVideo* video;
     QStandardItemModel *checkResModel;
-//    QHash<int, QString> sipMessage;
-    QVector<QString> sipMessage;
+    QString *sipMessage;
+    pGBStart_s currGBInfo;
+    QString *ip;
+    QString *port;
+    QString *pushMethod;
+    QString *pushId;
+    QProcess *pro;
     int seq;
     int handle;
     void SetList(pGBStart_s);
@@ -127,4 +140,6 @@ private slots:
     void setTextBrowser();
     void playVideo();
     void gotoMatchBuffer();
+    void pushStream();
+    void stopVideo();
 };

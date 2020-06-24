@@ -12,26 +12,10 @@
 
 using namespace std;
 
-void test()
-{
-    char * buf = "<Request><CmdType>SipShowBuffer</CmdType></Request>";
-    QString str;
-    QTextStream stream(&str);
-    QDomDocument doc;
-    doc.setContent(QString((char*)buf));
-    QDomNodeList list = doc.elementsByTagName("CmdType");
-    if(list.at(0).toElement().childNodes().at(0).toText().save(stream, 0), str == QString("SipShowBuffer"))
-    {
-        cout << "parseOK" << endl;
-    }
-    cout << str.toStdString() << endl;
-
-}
-
 int main(int argc, char *argv[])
 {
     pGBStart_s GB = (pGBStart_s)calloc(1, sizeof(GBStart_s));
-    QProcess* pro = new QProcess();
+//    QProcess* pro = new QProcess();
     int handle;
     int ret;
 //    pro->start("beanstalkd.exe -l 127.0.0.1 -p 11300");
