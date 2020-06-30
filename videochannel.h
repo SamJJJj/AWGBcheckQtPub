@@ -84,6 +84,7 @@ public:
     char vkek[16];
     char vkek_version[32];
     struct auth_info info;
+    int videotype;
 
 protected:
     void threadStart();

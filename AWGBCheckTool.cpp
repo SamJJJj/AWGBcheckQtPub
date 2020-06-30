@@ -836,6 +836,13 @@ void AWGBCheckTool::stopVideo(){
 
 void AWGBCheckTool::UDPPlay()
 {
+    if(ui.comboBox_4->currentIndex())
+    {
+        udpReceiver->channel->videotype = 2;
+    }
+    else {
+        udpReceiver->channel->videotype = 0;
+    }
     udpReceiver->channel->setEventHandle(video);
     udpReceiver->setPort(atoi((char *)currGBInfo->mediaPort));
     udpReceiver->start();
@@ -851,6 +858,13 @@ void AWGBCheckTool::UDPPlay()
 
 void AWGBCheckTool::TCPPlay()
 {
+    if(ui.comboBox_4->currentIndex())
+    {
+        tcpListener->channel->videotype = 2;
+    }
+    else {
+        tcpListener->channel->videotype = 0;
+    }
     tcpListener->connectType = 2;
     tcpListener->ip = *ip;
     tcpListener->port = atoi((char *)currGBInfo->mediaPort);
@@ -860,14 +874,20 @@ void AWGBCheckTool::TCPPlay()
     makeDevInfoAck(buf, ui.lineEdit->text());
     int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
     if(!ret)
-        cout << "UDPPlay send ACK OK!" << endl;
+        cout << "TCPPlay send ACK OK!" << endl;
     video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
 }
 
 
 void AWGBCheckTool::TCPActivePlay()
 {
-
+    if(ui.comboBox_4->currentIndex())
+    {
+        tcpListener->channel->videotype = 2;
+    }
+    else {
+        tcpListener->channel->videotype = 0;
+    }
     tcpListener->connectType = 1;
     tcpListener->ip = *ip;
 //    tcpListener->port = (*port).toInt();
@@ -878,7 +898,7 @@ void AWGBCheckTool::TCPActivePlay()
     makeDevInfoAck(buf, ui.lineEdit->text());
     int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
     if(!ret)
-        cout << "UDPPlay send ACK OK!" << endl;
+        cout << "TCPActive Play send ACK OK!" << endl;
     video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
 
 }

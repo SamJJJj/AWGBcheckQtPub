@@ -42,7 +42,7 @@ AUTH_FUN_INIT(ZXSVACDec_SetUKey);
 
 
 
-int videotype = 0;
+//int videotype = 0;
 
 int loadsvacdll()
 {
