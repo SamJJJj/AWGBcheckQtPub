@@ -14,6 +14,12 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+    QString c = "taskkill /im MediaServer.exe /f";
+    QProcess::execute(c);
+    c = "taskkill /im beanstalkd.exe /f";
+    QProcess::execute(c);
+    c = "taskkill /im AWGBBase.exe /f";
+    QProcess::execute(c);
     pGBStart_s GB = (pGBStart_s)calloc(1, sizeof(GBStart_s));
     QProcess* proBeanstalk = new QProcess();
     QProcess* proMS = new QProcess();
