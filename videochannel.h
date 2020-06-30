@@ -5,11 +5,19 @@
 #include <stdio.h>
 #include <list>
 
-#include "Mutex.h"
+#include "mutex.h"
 #include "DataListThread.h"
+
+#include <string>
+#include "savc/SvacPlayer.h"
+#include "savc/ZxSvacDecLib.h"
+#include "savc/svac_dec.h"
+#include "savc/utils.h"
+#define TEST_FRAME_NUM (-5)
 
 extern "C"
 {
+//    #include "savc/d3doffscreenrender.h"
     #include "libavcodec/avcodec.h"
     #include "libavformat/avformat.h"
     #include "libavutil/time.h"
@@ -58,6 +66,25 @@ public:
     int getCallId(){return (this!=NULL)?mCallId:-1;}
     int64_t getTimeStamp_MilliSecond();
 
+    int m_PsBufLen;
+    bool m_bStop;
+    int m_nNeedSnapCnt;
+    int m_nPlayCount;
+    int m_port;
+    int m_nTotalDecodeFrameCnt;
+    int m_nFileFrameCnt;
+    unsigned long long m_nFileDecodeTime;
+    void *handle;
+    int id = 0;
+    int frameLen, outFrameLen;
+    int filelen = 0;
+    int ret;
+    char *in_buff, *out_buff;
+
+    char vkek[16];
+    char vkek_version[32];
+    struct auth_info info;
+
 protected:
     void threadStart();
     void threadStop();
@@ -88,7 +115,9 @@ private:
     AVCodecContext *pCodecCtx;
     AVFrame * pFrameRGB;    //存放解码得到的RGB帧
     AVFrame * pFrame;
+    uint8_t * rgbBuffer;
     AVPacket packet;
+    int getContext = 0;
 
     SwsContext * img_convert_ctx;
     uint8_t *out_buffer_rgb;
@@ -104,6 +133,44 @@ private:
 
     void decodeH264Buffer(uint8_t *buffer, int size, bool isLostPacket);
 
+
+
+    void decodeSVACBuffer(uint8_t *buffer, int size, int tag);
+    HANDLE m_SvacHandle;
+    unsigned char *m_pBufDecode;				//临时存储裸码流。
+    unsigned char m_psAudioType;
+    unsigned char* m_psbuf;
+    bool m_FindIFrame;
+    SVAC_PREFETCH_PARAM m_param;
+    int m_BytePerSample;
+    unsigned char* m_buf;
+    unsigned char* m_svc_buf;
+
+    bool m_bCanPreview;
+//    D3DOffscreenRender* m_render;
+    Callback_AddText m_cbAddText;
+//    HWND m_hwnd;
+    int m_threadnum;
+    int m_coreId;
+    //CString m_ukey_name;
+    //CString m_ukey_pin;
+    //CString m_filename;
+    //CString m_password;
+    //CString m_cert_file_root;
+    //CString m_cert_file_self;
+    //CString m_crypt_key_version;
+    //CString m_crypt_key_for_video;
+    int m_decodeCount;
+
+
+    char* m_ukey_name;
+    char* m_ukey_pin;
+    char* m_filename;
+    char* m_password;
+    char* m_cert_file_root;
+    char* m_cert_file_self;
+    char* m_crypt_key_version;
+    char* m_crypt_key_for_video;
     ///用于输出到界面上的回调函数
 private:
     VideoChannelEventHandle *mVideoChannelEventHandle; //回调函数 用于传递信息给界面

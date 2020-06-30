@@ -1,3 +1,4 @@
+#pragma optimize("", off)
 #include "rtpreceiver.h"
 #include "videochannel.h"
 
@@ -13,7 +14,6 @@
 #include "jrtplib3/rtpsourcedata.h"
 #include "jrtplib3/rtpmemoryobject.h"
 
-#define RTP_SUPPORT_THREAD
 
 using namespace jrtplib;
 
@@ -147,7 +147,7 @@ static void checkerror(int rtperr)
 
 RtpReciever::RtpReciever()
 {
-    mIsStop = true;
+    mIsStoped = true;
     mIsThreadRunning = false;
     channel = new VideoChannel;
 }
@@ -159,7 +159,7 @@ RtpReciever::~RtpReciever()
 
 void RtpReciever::start()
 {
-    mIsStop = false;
+    mIsStoped = false;
     channel->start();
     //启动新的线程实现读取视频文件
     std::thread([&](RtpReciever *pointer)
@@ -172,8 +172,8 @@ void RtpReciever::start()
 
 void RtpReciever::stop(bool isWait)
 {
-    mIsStop = true;
-
+    mIsStoped = true;
+    channel->stop();
     if (isWait)
     {
         while(mIsThreadRunning)
@@ -186,6 +186,7 @@ void RtpReciever::stop(bool isWait)
 void RtpReciever::run()
 {
 
+    std::cout << "------------- reciver 0-0 ----------" << std::endl;
 #ifdef RTP_SOCKETTYPE_WINSOCK
        WSADATA dat;
        WSAStartup(MAKEWORD(2, 2), &dat);
@@ -197,52 +198,42 @@ void RtpReciever::run()
     uint16_t portbase;
 
     int status;
-
     RTPUDPv4TransmissionParams transparams;
     RTPSessionParams sessparams;
     //解析帧数
-    sessparams.SetOwnTimestampUnit(1.0 / 9000.0);
-    sessparams.SetUsePollThread(true);
-
-    int rtpPort = MEDIASERVER_RTP_PORT;
-    portbase = 9000;
-    transparams.SetRTPReceiveBuffer(1024 * 1024 *100); //100M
+    sessparams.SetOwnTimestampUnit(1.0 / 9000);
+//    sessparams.SetUsePollThread(true);
+std::cout << "------------- reciver 0-1 ----------" << std::endl;
+    portbase = port;
+    transparams.SetRTPReceiveBuffer(1024 * 1024 *10); //10M
 
     sessparams.SetAcceptOwnPackets(true);
     transparams.SetPortbase(portbase);
     status = sess.Create(sessparams, &transparams);
-
     if (status < 0)
     {
         std::cout << "ERROR: " << RTPGetErrorString(status) << std::endl;
-
-//        char ch[LOGSTR_MAX_LENGTH]={0};
-//        sprintf(ch,"%s ERROR: %s rtpPort=%d\n",__FUNCTION__,RTPGetErrorString(status).c_str(),rtpPort);
-//        AppConfig::gLogWriter->writeLog(WRITE_LOG_ID_MAIN, ch);
-
         exit(1);
     }
-
-//    char ch[LOGSTR_MAX_LENGTH]={0};
-//    sprintf(ch,"%s rtpPort=%d\n",__FUNCTION__,rtpPort);
-//    AppConfig::gLogWriter->writeLog(WRITE_LOG_ID_MAIN, ch);
-
     //开始接收流包
     uint32_t ssrcbay=0;
-    while(!mIsStop)
+//    std::cout << "------------- reciver 0-2 ----------" << std::endl;
+    while(!mIsStoped)
     {
-        sess.BeginDataAccess();
+        Sleep(100);
 
+        sess.BeginDataAccess();
+//  std::cout << "------------- destroyed 0 ----------" << std::endl;
         // check incoming packets
         if (sess.GotoFirstSourceWithData())
         {
+
             do
             {
                 RTPPacket *pack;
 
                 while ((pack = sess.GetNextPacket()) != NULL)
                 {
-
                     RTPSourceData *mRTPSourceData = sess.GetCurrentSourceInfo();
 //                    std::cout << "get data!" << std::endl;
                     uint32_t ssrc = mRTPSourceData->GetSSRC();
@@ -250,8 +241,8 @@ void RtpReciever::run()
                         ssrcbay = ssrc;
                     }
 //                    ssrc不需要传
-//                    if (ssrc != ssrcbay) continue;
-//                    int cameraId = ssrc-100000000; //这里的ssrc就是cameraId 在invite的时候传给相机的
+                    if (ssrc != ssrcbay) continue;
+                    int cameraId = ssrc-100000000; //这里的ssrc就是cameraId 在invite的时候传给相机的
 
 //                    VideoChannel* channel = AppConfig::gGB28181Server->getVideoChannel(cameraId);
 //                      也要通过cameraId联系起来
@@ -261,37 +252,73 @@ void RtpReciever::run()
 //                    if (channel != nullptr)
 //                    {
                         ///////////////////////////////////////
-                        if (mIsStop == 1) {
-                            break;
-                        }
-                        ///////////////////////////////////////
-                        //将buffer传给解析器，这里以后要传一个特殊的channel区分设备
-                        //因为以后可能有多个channel同时接收
-                        channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
+                   if (mIsStoped == 1) {
+                        sess.DeletePacket(pack);
+                        break;
+                    }
+                    ///////////////////////////////////////
+                    //将buffer传给解析器，这里以后要传一个特殊的channel区分设备
+                    //因为以后可能有多个channel同时接收
+                     channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
 //                    }
 
-                    // we don't longer need the packet, so
-                    // we'll delete it
-                    sess.DeletePacket(pack);
-                }
-
-            } while (sess.GotoNextSourceWithData());
-        }
-        ssrcbay = 0;
+                // we don't longer need the packet, so
+                // we'll delete it
+                sess.DeletePacket(pack);
+            }
+            if (mIsStoped == 1) {
+                break;
+            }
+        } while (sess.GotoNextSourceWithData());
+        //}
         sess.EndDataAccess();
-
-#ifndef RTP_SUPPORT_THREAD
-        status = sess.Poll();
-        checkerror(status);
-#endif // RTP_SUPPORT_THREAD
-
+//        RTPTime::Wait(RTPTime(0, 10));
     }
-
-    sess.BYEDestroy(RTPTime(10, 0), 0, 0);
-
+    }
+    struct timeval Timeout;
+    Timeout.tv_sec = 0;
+    Timeout.tv_usec = 500;
+    std::cout << "------------- destroyed 1 ----------" << std::endl;
+    sess.BYEDestroy(RTPTime(Timeout.tv_sec, Timeout.tv_usec), 0, 0);
+    std::cout << "------------- destroyed ----------" << std::endl;
+#ifdef WIN32
+    WSACleanup();
+    std::cout << "------------- destroyed end----------" << std::endl;
+#endif
     mIsThreadRunning = false;
-
 }
+
+//void RtpReciever::run()
+//{
+//////#ifdef RTP_SOCKETTYPE_WINSOCK
+//////       WSADATA dat;
+//////       WSAStartup(MAKEWORD(2, 2), &dat);
+//////#endif // RTP_SOCKETTYPE_WINSOCK
+
+////    mIsThreadRunning = true;
+
+////    RTPSession sess;
+////    uint16_t portbase;
+
+////    int status;
+////    RTPUDPv4TransmissionParams transparams;
+////    RTPSessionParams sessparams;
+////    //解析帧数
+////    sessparams.SetOwnTimestampUnit(1.0 / 9000);
+//////    sessparams.SetUsePollThread(true);
+////std::cout << "------------- reciver 0-1 ----------" << std::endl;
+////    portbase = port;
+//////    transparams.SetRTPReceiveBuffer(1024 * 1024 *10); //10M
+//////    sessparams.SetAcceptOwnPackets(true);
+//////    transparams.SetPortbase(portbase);
+//////    status = sess.Create(sessparams, &transparams);
+//////    std::cout << "status :" << status << std::endl;
+//////    Sleep(2000);
+//////    sess.BYEDestroy(RTPTime(10, 0), 0, 0);
+////    std::cout << "------------- destroyed end----------" << std::endl;
+////    mIsThreadRunning = false;
+//}
+
 
 int RtpReciever::GetH264FromPs(char* buffer, int length, char *h264Buffer, int *h264length)
 {
@@ -403,4 +430,9 @@ int RtpReciever::GetH264FromPs(char* buffer, int length, char *h264Buffer, int *
     }
 
     return *h264length;
+}
+
+void RtpReciever::setPort(int p)
+{
+    port = p;
 }

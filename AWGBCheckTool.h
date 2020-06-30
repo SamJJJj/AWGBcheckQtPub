@@ -21,6 +21,7 @@ public:
     explicit GetAndParseThread(QObject * parent = 0);
     ~GetAndParseThread();
     void init(QStandardItemModel*, QStandardItemModel*, int, QString *, QString *, QString *, QString *, QString *);
+    void setMethod(const QString & );
 protected:
     void run();
 signals:
@@ -28,9 +29,13 @@ signals:
     void toTable();
     void toText();
     void push();
+    void UDP();
+    void TCP();
+    void TCPActive();
 private:
     int handle;
     int tableId;
+    QString method;
     QString *ip;
     QString *port;
     QString *pushMethod;
@@ -142,4 +147,7 @@ private slots:
     void gotoMatchBuffer();
     void pushStream();
     void stopVideo();
+    void UDPPlay();
+    void TCPPlay();
+    void TCPActivePlay();
 };

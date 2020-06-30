@@ -74,13 +74,16 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(ui.tableView, &QTableView::clicked, this, &AWGBCheckTool::gotoMatchBuffer);
     connect(getThread, &GetAndParseThread::push, this, &AWGBCheckTool::pushStream);
     connect(ui.pushButton_25, &QPushButton::clicked, this, &AWGBCheckTool::stopVideo);
+    connect(getThread, &GetAndParseThread::UDP, this, &AWGBCheckTool::UDPPlay);
+    connect(getThread, &GetAndParseThread::TCP, this, &AWGBCheckTool::TCPPlay);
+    connect(getThread, &GetAndParseThread::TCPActive, this, &AWGBCheckTool::TCPActivePlay);
 }
 
 AWGBCheckTool::~AWGBCheckTool()
 {
     getThread->terminate();
     udpReceiver->stop();
-    pro->kill();
+//    pro->kill();
     delete video;
 }
 
@@ -230,6 +233,36 @@ int reverseModeType(QString s)
     {
         return -1;
     }
+}
+
+void makeDeviceInviteXml(char *xmlBuffer, QString method, QString deviceid)
+{
+    QDomDocument doc;
+    QDomElement root=doc.createElement("Request");
+    doc.appendChild(root);
+
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("SipCmd");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+
+    QDomElement deviceId = doc.createElement("DeviceId");
+    QDomText deviceIdText = doc.createTextNode(deviceid);
+    deviceId.appendChild(deviceIdText);
+    root.appendChild(deviceId);
+
+    QDomElement devicePort = doc.createElement("SipCmd");
+    QDomText devicePortText = doc.createTextNode("Invite");
+    devicePort.appendChild(devicePortText);
+    root.appendChild(devicePort);
+
+    QDomElement playMet = doc.createElement("Method");
+    QDomText playMetText = doc.createTextNode(method);
+    playMet.appendChild(playMetText);
+    root.appendChild(playMet);
+
+
+    memcpy(xmlBuffer, doc.toString().toStdString().c_str(), doc.toString().length());
 }
 
 
@@ -585,8 +618,6 @@ void AWGBCheckTool::playVideo()
     if(currGBInfo->modeType == 2)
     {
         //后端发invite
-        pro = new QProcess();
-        pro->start("MediaServer.exe");
         QDomDocument doc;
         QDomElement root = doc.createElement("Request");
         doc.appendChild(root);
@@ -609,33 +640,38 @@ void AWGBCheckTool::playVideo()
     }
     else
     {
+        //      不同选项不同模式
+        char sendBuf[2048] = {0};
+        QString deId = ui.lineEdit->text();
+        int ret;
         switch (ui.comboBox_3->currentIndex()) {
         //      不同选项不同模式
         case 0:
             //            cout << "udp" << endl;
-            udpReceiver->channel->setEventHandle(video);
-            udpReceiver->start();
-            video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
-            ui.pushButton_24->setEnabled(false);
+            makeDeviceInviteXml(sendBuf,  "UDP", deId);
+            ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
+            getThread->setMethod("UDP");
+            cout << "UDP mode" << endl;
             break;
         case 1:
-            tcpListener->connectType = 1;
-            tcpListener->channel->setEventHandle(video);
-            tcpListener->start();
-            video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
-            ui.pushButton_24->setEnabled(false);
+            makeDeviceInviteXml(sendBuf, "TCP_Active", deId);
+            ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
             //            cout << "TCP 主动" << endl;
+            getThread->setMethod("TCP_Active");
+            cout << "TCP_Active mode" << endl;
             break;
         case 2:
-            tcpListener->connectType = 2;
-            tcpListener->channel->setEventHandle(video);
-            tcpListener->start();
-            video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
-            ui.pushButton_24->setEnabled(false);
+            makeDeviceInviteXml(sendBuf, "TCP", deId);
+            ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
             //            cout << "TCP 被动" << endl;
+            getThread->setMethod("TCP");
+            cout << "TCP mode" << endl;
             break;
-        }
-    }
+            }
+     }
+        ui.comboBox_3->setEnabled(false);
+        ui.pushButton_24->setEnabled(false);
+
 }
 
 void AWGBCheckTool::gotoMatchBuffer()
@@ -669,7 +705,7 @@ void AWGBCheckTool::pushStream()
     //http://127.0.0.1/index/api/bind_GBRtpSsrc?client_ip=192.168.0.92&client_port=4001&GBrtpSSRC=1
     //关闭
     //http://127.0.0.1/index/api/close_pushGB28181Rtp?schema=rtp&vhost=__defaultVhost__&app=rtp&stream=1&PushUrl=rtp://192.168.0.92:8000
-    QString url1 = "http://127.0.0.1/index/api/push_GB28181Rtp?schema=rtp&vhost=__defaultVhost__&app=rtp&stream=1&PushUrl=rtp://192.168.0.241:10000&RTPtype=1";
+    QString url1 = "http://127.0.0.1/index/api/push_MP4toStream?Mp4Path=D:\\test.mp4&app=rtp&stream=1";
     QNetworkAccessManager *manager = new QNetworkAccessManager();
     QNetworkRequest request;
     request.setUrl(QUrl(url1));
@@ -680,9 +716,10 @@ void AWGBCheckTool::pushStream()
     eventLoop.exec();
     // 获取网页Body中的内容
     QByteArray bytes = pReply->readAll();
-    if(bytes[14].operator!=(0))
+    cout << bytes.toStdString() << endl;
+    if(bytes[14].operator!=('0'))
     {
-        cout << "注册失败" << endl;
+        cout << "register mp4 failed" << endl;
         return;
     }
     request.setUrl((QUrl(url)));
@@ -690,7 +727,8 @@ void AWGBCheckTool::pushStream()
     QObject::connect(manager, &QNetworkAccessManager::finished, &eventLoop, &QEventLoop::quit);
     eventLoop.exec();
     bytes = pReply->readAll();
-    if(bytes[14].operator==(0))
+    cout << bytes.toStdString() << endl;
+    if(bytes[14].operator==('0'))
     {
 
         QDomDocument doc;
@@ -701,28 +739,146 @@ void AWGBCheckTool::pushStream()
         cmdType.appendChild(cmdTypeText);
         root.appendChild(cmdType);
         QDomElement sipCmd = doc.createElement("SipCmd");
-        QDomText sipCmdText = doc.createTextNode("ACK");
+        QDomText sipCmdText = doc.createTextNode("Ack");
         sipCmd.appendChild(sipCmdText);
         root.appendChild(sipCmd);
         QDomElement deviceId = doc.createElement("DeviceId");
         QDomText deviceIdText = doc.createTextNode(*pushId);
         deviceId.appendChild(deviceIdText);
         root.appendChild(deviceId);
+        int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().length());
+        if(!ret)
+            cout << "ACk send OK!" << endl;
     }
+}
 
-
+void makeDevInfoAck(char * buf, QString deId)
+{
+    QDomDocument doc;
+    QDomElement root = doc.createElement("Request");
+    doc.appendChild(root);
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("SipCmd");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+    QDomElement sipCmd = doc.createElement("SipCmd");
+    QDomText sipCmdText = doc.createTextNode("Ack");
+    sipCmd.appendChild(sipCmdText);
+    root.appendChild(sipCmd);
+    QDomElement deviceId = doc.createElement("DeviceId");
+    QDomText deviceIdText = doc.createTextNode(deId);
+    deviceId.appendChild(deviceIdText);
+    root.appendChild(deviceId);
+    memcpy(buf, doc.toString().toStdString().c_str(), doc.toString().length());
 }
 
 
 void AWGBCheckTool::stopVideo(){
     char sendBuf[2048] = {0};
     QString deId = ui.lineEdit->text();
+//    QString urlS = "http://127.0.0.1/index/api/close_pushGB28181Rtp?schema=rtp&vhost=__defaultVhost__&app=rtp&stream=1&PushUrl=rtp://"+*ip+":" + *port;
+//    QNetworkAccessManager *manager = new QNetworkAccessManager();
+//    QNetworkRequest request;
+//    request.setUrl(QUrl(urlS));
+//    QNetworkReply *pReply = manager->get(request);
+//    // 开启一个局部的事件循环，等待页面响应结束
+//    QEventLoop eventLoop;
+//    QObject::connect(manager, &QNetworkAccessManager::finished, &eventLoop, &QEventLoop::quit);
+//    eventLoop.exec();
+//    // 获取网页Body中的内容
+//    QByteArray bytes = pReply->readAll();
+//    cout << bytes.toStdString() << endl;
+//    if(bytes[14].operator!=('0'))
+//    {
+//        cout << "stop failed" << endl;
+//        ui.pushButton_24->setEnabled(true);
+//        return;
+//    }
+    QDomDocument doc;
+    QDomElement root = doc.createElement("Request");
+    doc.appendChild(root);
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("SipCmd");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+    QDomElement sipCmd = doc.createElement("SipCmd");
+    QDomText sipCmdText = doc.createTextNode("Bye");
+    sipCmd.appendChild(sipCmdText);
+    root.appendChild(sipCmd);
+    QDomElement deviceId = doc.createElement("DeviceId");
+    QDomText deviceIdText;
+    if(!pushId->isEmpty())
+        deviceIdText = doc.createTextNode(*pushId);
+    else {
+        deviceIdText = doc.createTextNode(ui.lineEdit->text());
+    }
+    deviceId.appendChild(deviceIdText);
+    root.appendChild(deviceId);
+    int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().length());
+    if(!ret)
+        cout << "Bye send OK!" << endl;
 //发bye    makeDeviceStopXml(deId, sendBuf);
     //int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
-    tcpListener->stop();
-    udpReceiver->stop();
-    video->clear();
+    //udpReceiver->channel->stop();
     tcpListener->channel->stop();
-    udpReceiver->channel->stop();
+    tcpListener->stop();
+//    udpReceiver->stop();
+//    udpReceiver->channel->clearData();
+//    getThread->quit();
+    udpReceiver->stop();
+//    udpReceiver->channel->stop();
+    //Sleep(1000);
+
+    video->clear();
     ui.pushButton_24->setEnabled(true);
+    ui.comboBox_3->setEnabled(true);
+}
+
+void AWGBCheckTool::UDPPlay()
+{
+    udpReceiver->channel->setEventHandle(video);
+    udpReceiver->setPort(atoi((char *)currGBInfo->mediaPort));
+    udpReceiver->start();
+    char * buf = (char*)calloc(1024, sizeof(char));
+    makeDevInfoAck(buf, ui.lineEdit->text());
+    int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
+    cout << buf <<endl;
+    if(!ret)
+        cout << "UDPPlay send ACK OK!" << endl;
+    video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
+    free(buf);
+}
+
+void AWGBCheckTool::TCPPlay()
+{
+    tcpListener->connectType = 2;
+    tcpListener->ip = *ip;
+    tcpListener->port = atoi((char *)currGBInfo->mediaPort);
+    tcpListener->channel->setEventHandle(video);
+    tcpListener->start();
+    char * buf = (char*)calloc(1024, sizeof(char));
+    makeDevInfoAck(buf, ui.lineEdit->text());
+    int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
+    if(!ret)
+        cout << "UDPPlay send ACK OK!" << endl;
+    video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
+}
+
+
+void AWGBCheckTool::TCPActivePlay()
+{
+
+    tcpListener->connectType = 1;
+    tcpListener->ip = *ip;
+//    tcpListener->port = (*port).toInt();
+    tcpListener->port = atoi((char *)currGBInfo->mediaPort);
+    tcpListener->channel->setEventHandle(video);
+    tcpListener->start();
+    char * buf = (char*)calloc(1024, sizeof(char));
+    makeDevInfoAck(buf, ui.lineEdit->text());
+    int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
+    if(!ret)
+        cout << "UDPPlay send ACK OK!" << endl;
+    video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
+
 }

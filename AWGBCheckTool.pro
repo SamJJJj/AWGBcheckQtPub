@@ -282,3 +282,20 @@ win32: LIBS += -L$$PWD/./ -llibswresample.dll
 
 INCLUDEPATH += $$PWD/.
 DEPENDPATH += $$PWD/.
+
+win32: LIBS += -L$$PWD/svaclib/ -llibsvac_dec
+
+INCLUDEPATH += $$PWD/svaclib
+DEPENDPATH += $$PWD/svaclib
+
+win32: LIBS += -L$$PWD/svaclib/ -lrtspApp
+
+INCLUDEPATH += $$PWD/svaclib
+DEPENDPATH += $$PWD/svaclib
+
+win32: LIBS += -L$$PWD/svaclib/ -lZxSvacDecLib
+
+INCLUDEPATH += $$PWD/svaclib
+DEPENDPATH += $$PWD/svaclib
+
+QMAKE_CXXFLAGS_RELEASE -= -O2

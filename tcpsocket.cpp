@@ -99,6 +99,8 @@ void TcpListener::tcpListenerStart() {
     {
         //mIsStop = true;
         sess2.BeginDataAccess();
+        Sleep(1000);
+        cout << "Asdasd"<<endl;
         if (sess2.GotoFirstSourceWithData())
         {
             do
@@ -110,7 +112,7 @@ void TcpListener::tcpListenerStart() {
                     RTPSourceData *mRTPSourceData = sess2.GetCurrentSourceInfo();
                     uint32_t ssrc = mRTPSourceData->GetSSRC();
                     int cameraId = ssrc - 100000000;
-                    cout << 123 <<endl;
+                    //cout << 123 <<endl;
 //					channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
 
 
@@ -158,9 +160,8 @@ void TcpListener::run() {
     //��IP�Ͷ˿�
     sockaddr_in sin;
     sin.sin_family = AF_INET;
-//    connectType = 1;
     if (connectType == 2) {
-        sin.sin_port = htons(9000);
+        sin.sin_port = htons(port);
         sin.sin_addr.S_un.S_addr = INADDR_ANY;
         if (bind(slisten, (LPSOCKADDR)&sin, sizeof(sin)) == SOCKET_ERROR)
         {
@@ -184,11 +185,6 @@ void TcpListener::run() {
                 return;
             }
 //            tcpListenerStart();
-
-
-
-
-
             const int packSize = 1500;
             RTPSessionParams sessParams;
             RTPTCPTransmitter trans2 = RTPTCPTransmitter(0);
@@ -196,8 +192,6 @@ void TcpListener::run() {
             sessParams.SetProbationType(RTPSources::NoProbation);
             sessParams.SetOwnTimestampUnit(1.0 / packSize);
             sessParams.SetMaximumPacketSize(packSize + 64);
-
-
             bool threadsafe = false;
         #ifdef RTP_SUPPORT_THREAD
             threadsafe = true;
@@ -210,7 +204,7 @@ void TcpListener::run() {
             checkerror(sess2.AddDestination(RTPTCPAddress(sClient)));
         //    std::vector<uint8_t> pack(packSize);
             uint32_t ssrcbay = 0;
-            while (1)
+            while (!mIsStop)
             {
 //                sess2.Poll();
 //                w++;
@@ -236,9 +230,6 @@ void TcpListener::run() {
                             cout<<123<<endl;
                             channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
                             sess2.DeletePacket(pack);
-
-
-
                         }
                     } while (sess2.GotoNextSourceWithData());
                 }
@@ -254,26 +245,26 @@ void TcpListener::run() {
                     break;
                 }
             }
-
-
-
-
-
-
+            sess2.BYEDestroy(RTPTime(10, 0), 0, 0);
             if (sign == 0) {
                 closesocket(slisten);
                 closesocket(sClient);
             }
         }
+        return ;
     }
     else if (connectType == 1) {
-        sin.sin_port = htons(activePort);
-        sin.sin_addr.S_un.S_addr = inet_addr(activeIp);
+//        memset(&sin,0,sizeof (LPSOCKADDR));
+        sin.sin_port = htons(port);
+        sin.sin_addr.S_un.S_addr = inet_addr(ip.toStdString().c_str());
+        cout << "------------------------------" << endl;
+        cout << port << endl;
+        cout << ip.toStdString() << endl;
+        cout << "------------------------------" << endl;
         while (sign) {
-            if (connect(slisten, (LPSOCKADDR)&sin, sizeof(sin)) == SOCKET_ERROR) {
+            if (connect(slisten, (LPSOCKADDR)&sin, sizeof(SOCKADDR)) == SOCKET_ERROR) {
                 qDebug("Cannot connect Ipc");
             }
-//            qDebug(u8"�ɹ����ӵ�Ipc��%s:%d \r\n",activeIp,activePort);
 //            tcpListenerStart();
 
 
@@ -301,10 +292,11 @@ void TcpListener::run() {
         //    std::vector<uint8_t> pack(packSize);
 //            cout << "one sleep" <<endl;
             //这是一个循环
-            while (1)
+            while (!mIsStop)
             //这是第一个循环的左大括号
             {
-                sess2.Poll();
+//                sess2.Poll();
+                Sleep(1000);
                 cout << 2 <<endl;
                 //mIsStop = true;
                 sess2.BeginDataAccess();
@@ -330,8 +322,6 @@ void TcpListener::run() {
 
 
 
-                            // we don't longer need the packet, so
-                            // we'll delete it
                             sess2.DeletePacket(pack);
                             cout << "two sleep" <<endl;
                         }
@@ -339,25 +329,17 @@ void TcpListener::run() {
                 }
                 sess2.EndDataAccess();
         #ifndef RTP_SUPPORT_THREAD
-                //checkerror(sess1.Poll());
-//                checkerror(sess2.Poll());
         #endif // RTP_SUPPORT_THREAD
-                //sess1.BYEDestroy(RTPTime(10,0),0,0);
-                //sess2.BYEDestroy(RTPTime(10, 0), 0, 0);
                 if (sign == 0) {
                     sess2.BYEDestroy(RTPTime(10, 0), 0, 0);
                     break;
                 }
             }
 
-
-
-
-
-
-
             if (sign == 0) {
                 closesocket(slisten);
             }
         }
-    }}
+        return;
+    }
+}

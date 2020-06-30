@@ -31,9 +31,8 @@ public:
     int64_t getTimeStamp_MilliSecond1();
 
 protected:
-    bool mIsStop;
     bool mIsThreadRunning;
-
+    bool mIsStop;
     void run();
 
 private:
@@ -68,7 +67,7 @@ void DataListThread<T>::start()
 {
     mIsStop = false;
 
-    //启动新的线程
+//    启动新的线程
     std::thread([&](DataListThread *pointer)
     {
         pointer->run();
@@ -163,8 +162,8 @@ void DataListThread<T>::run()
                 mList.pop_front();
                 mCondition->Unlock();
                 dealwithDataNode(node);
-                int64_t end = getTimeStamp_MilliSecond1();
-                std::cout << end % 1000 << " dealed" << std::endl;
+               // int64_t end = getTimeStamp_MilliSecond1();
+               // std::cout << end % 1000 << " dealed" << std::endl;
         }
     }
 

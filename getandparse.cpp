@@ -17,6 +17,11 @@ GetAndParseThread::~GetAndParseThread()
 
 }
 
+void GetAndParseThread::setMethod(const QString & m)
+{
+    method = m;
+}
+
 void GetAndParseThread::init(QStandardItemModel* tree, QStandardItemModel *table, int h, QString* sipMessage, QString* i, QString* p, QString *pm, QString *id)
 {
     treeModel = tree;
@@ -42,11 +47,10 @@ void GetAndParseThread::run()
     while(1)
     {
         bool flag = true;
-        Sleep(500);
+        Sleep(100);
         ret = AW_BSQueue_GetBuffer(handle, buf, &len);
         if(!ret)
         {
-            cout << len << endl;
             //解析发来的数据，放进结构体，setModel, 发信号
             QDomDocument doc;
             doc.setContent(QString((char*)buf));
@@ -99,10 +103,10 @@ void GetAndParseThread::run()
                     checkResModel->setItem(tableId, 2, new QStandardItem(""));
                     checkResModel->setItem(tableId, 3, new QStandardItem(""));
 //                    ++tableId;
-                    cout << tableId << endl;
+                    //cout << tableId << endl;
                 }else{
                     ++tableId;
-                    cout << tableId << endl;
+                    //cout << tableId << endl;
                 }
 
                 emit toText();
@@ -132,7 +136,7 @@ void GetAndParseThread::run()
                 strID.clear();
                 strName.clear();
                 item.clear();
-                QDomNodeList deviceChannel = doc.elementsByTagName("ChannelID");
+                QDomNodeList deviceChannel = list3.elementsByTagName("ChannelID");
                 int deCut = deviceChannel.size();
                 int count =0;
                 while (count<deCut){
@@ -160,7 +164,37 @@ void GetAndParseThread::run()
             {
                 QString text;
                 QTextStream streamText(&text);
-                list = doc.elementsByTagName("DeviceIp");
+                list = doc.elementsByTagName("DeviceID");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                *pushId = text;
+                text.clear();
+
+                list = doc.elementsByTagName("DevicePort");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                *port = text;
+                text.clear();
+
+                list = doc.elementsByTagName("DeviceIP");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                *ip = text;
+                text.clear();
+
+                list = doc.elementsByTagName("PushMethod");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                *pushMethod = text;
+                text.clear();
+                emit push();
+                str.clear();
+            }
+            else if(str == QString("PullStream"))
+            {
+                QString text;
+                QTextStream streamText(&text);
+                list = doc.elementsByTagName("DeviceID");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                text.clear();
+
+                list = doc.elementsByTagName("DeviceIP");
                 list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
                 *ip = text;
                 text.clear();
@@ -170,17 +204,22 @@ void GetAndParseThread::run()
                 *port = text;
                 text.clear();
 
-                list = doc.elementsByTagName("PushMethod");
+                list = doc.elementsByTagName("Method");
                 list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
-                *pushMethod = text;
+                if(method == QString("UDP"))
+                    emit UDP();
+                else if(method == QString("TCP"))
+                {
+                    emit TCP();
+                    cout << "TCP play" << endl;
+                }
+                else
+                    emit TCPActive();
                 text.clear();
-
-                list = doc.elementsByTagName("DeviceId");
-                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
-                *pushId = text;
-                text.clear();
-                emit push();
+                str.clear();
             }
+            cout << "AW_BSQueue_GetBuffer"<< endl;
+            cout << len << endl;
             memset(buf, 0, 2048);
             len = INT_MAX;
         }

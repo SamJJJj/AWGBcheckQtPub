@@ -20,6 +20,8 @@ public:
     void tcpListenerStart();
     int connectType;
     int sign;
+    int port;
+    QString ip;
     int activePort;
     char *activeIp;
     VideoChannel *channel;  //后面不应该是这种方式

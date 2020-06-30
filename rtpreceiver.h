@@ -15,12 +15,13 @@ public:
 
 public:
     void start();
-
+    void setPort(int);
     void stop(bool isWait = false);
     VideoChannel *channel;  //后面不应该是这种方式
+    bool mIsStoped;
 protected:
-    bool mIsStop;
     bool mIsThreadRunning;
+    int port;
     void run();
 
 public:
