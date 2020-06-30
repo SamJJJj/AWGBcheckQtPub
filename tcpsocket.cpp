@@ -246,7 +246,7 @@ void TcpListener::run() {
                 }
             }
             sess2.BYEDestroy(RTPTime(10, 0), 0, 0);
-            if (sign == 0) {
+            if (sign == 1) {
                 closesocket(slisten);
                 closesocket(sClient);
             }
@@ -330,13 +330,13 @@ void TcpListener::run() {
                 sess2.EndDataAccess();
         #ifndef RTP_SUPPORT_THREAD
         #endif // RTP_SUPPORT_THREAD
-                if (sign == 0) {
+                if (sign == 1) {
                     sess2.BYEDestroy(RTPTime(10, 0), 0, 0);
                     break;
                 }
             }
 
-            if (sign == 0) {
+            if (sign == 1) {
                 closesocket(slisten);
             }
         }
