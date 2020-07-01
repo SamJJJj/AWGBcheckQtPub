@@ -22,6 +22,7 @@ public:
     ~GetAndParseThread();
     void init(QStandardItemModel*, QStandardItemModel*, int, QString *, QString *, QString *, QString *, QString *);
     void setMethod(const QString & );
+    void clearList();
 protected:
     void run();
 signals:
@@ -150,4 +151,7 @@ private slots:
     void UDPPlay();
     void TCPPlay();
     void TCPActivePlay();
+    void clearInfo();
+    void clearList();
+    void reMain();
 };

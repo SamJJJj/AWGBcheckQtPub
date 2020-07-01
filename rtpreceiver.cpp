@@ -205,7 +205,7 @@ void RtpReciever::run()
 //    sessparams.SetUsePollThread(true);
 std::cout << "------------- reciver 0-1 ----------" << std::endl;
     portbase = port;
-    transparams.SetRTPReceiveBuffer(1024 * 1024 *10); //10M
+    transparams.SetRTPReceiveBuffer(1024 * 1024 *30); //10M
 
     sessparams.SetAcceptOwnPackets(true);
     transparams.SetPortbase(portbase);
@@ -219,15 +219,15 @@ std::cout << "------------- reciver 0-1 ----------" << std::endl;
     uint32_t ssrcbay=0;
 //    std::cout << "------------- reciver 0-2 ----------" << std::endl;
     while(!mIsStoped)
+//    while(1)
     {
         Sleep(100);
 
         sess.BeginDataAccess();
-//  std::cout << "------------- destroyed 0 ----------" << std::endl;
         // check incoming packets
-        if (sess.GotoFirstSourceWithData())
+        if (sess.GotoFirstSource())
         {
-
+//            std::cout << "------------- destroyed 0 ----------" << std::endl;
             do
             {
                 RTPPacket *pack;
@@ -259,6 +259,7 @@ std::cout << "------------- reciver 0-1 ----------" << std::endl;
                     ///////////////////////////////////////
                     //将buffer传给解析器，这里以后要传一个特殊的channel区分设备
                     //因为以后可能有多个channel同时接收
+//                   std::cout<< "---- reach inputRtpBufer ! ----" << std::endl;
                      channel->inputRtpBuffer(pack->GetPayloadData(), pack->GetPayloadLength(), pack->GetSequenceNumber(), pack->HasMarker());
 //                    }
 
@@ -269,7 +270,7 @@ std::cout << "------------- reciver 0-1 ----------" << std::endl;
             if (mIsStoped == 1) {
                 break;
             }
-        } while (sess.GotoNextSourceWithData());
+        } while (sess.GotoNextSource());
         //}
         sess.EndDataAccess();
 //        RTPTime::Wait(RTPTime(0, 10));

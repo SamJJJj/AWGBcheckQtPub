@@ -225,3 +225,8 @@ void GetAndParseThread::run()
         }
     }
 }
+
+void GetAndParseThread::clearList()
+{
+    tableId = 0;
+}

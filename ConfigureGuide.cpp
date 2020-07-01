@@ -46,7 +46,8 @@ ConfigureGuide::ConfigureGuide(QWidget *parent, void *param, int h)
     connect(ui.LineEdit_9, &QLineEdit::textEdited, this, &ConfigureGuide::LineEditChange);
     connect(ui.startButton, &QPushButton::clicked, this, [=]{ConfigureGuide::SetConfigure(param);});
     connect(ui.exButton, &QPushButton::clicked, this, &ConfigureGuide::exConf);
-    connect(ui.inButton, &QPushButton::clicked, this, &ConfigureGuide::inConf);
+//    connect(ui.inButton, &QPushButton::clicked, this, &ConfigureGuide::inConf);
+    connect(ui.boBox_1, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ConfigureGuide::inConf);
 }
 void ConfigureGuide::inConf(){
     int in = ui.boBox_1->currentIndex();

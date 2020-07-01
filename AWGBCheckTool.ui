@@ -601,12 +601,19 @@
             </property>
            </spacer>
           </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_36">
+            <property name="text">
+             <string>返回配置界面</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
          <widget class="QStackedWidget" name="stackedWidget">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="page">
            <layout class="QGridLayout" name="gridLayout_5">
@@ -751,6 +758,18 @@
                   </item>
                   <item>
                    <widget class="QPushButton" name="pushButton_34">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>29</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>93</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
                     <property name="text">
                      <string>👉</string>
                     </property>
@@ -762,16 +781,10 @@
                  <layout class="QHBoxLayout" name="horizontalLayout_19">
                   <item>
                    <widget class="QComboBox" name="comboBox_4">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
                     <property name="maximumSize">
                      <size>
-                      <width>80</width>
-                      <height>25</height>
+                      <width>93</width>
+                      <height>29</height>
                      </size>
                     </property>
                     <item>
@@ -781,23 +794,17 @@
                     </item>
                     <item>
                      <property name="text">
-                      <string>svac</string>
+                      <string>savc</string>
                      </property>
                     </item>
                    </widget>
                   </item>
                   <item>
                    <widget class="QComboBox" name="comboBox_3">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
                     <property name="maximumSize">
                      <size>
-                      <width>80</width>
-                      <height>25</height>
+                      <width>93</width>
+                      <height>29</height>
                      </size>
                     </property>
                     <item>

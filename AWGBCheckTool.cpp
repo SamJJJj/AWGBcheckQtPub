@@ -77,6 +77,9 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(getThread, &GetAndParseThread::UDP, this, &AWGBCheckTool::UDPPlay);
     connect(getThread, &GetAndParseThread::TCP, this, &AWGBCheckTool::TCPPlay);
     connect(getThread, &GetAndParseThread::TCPActive, this, &AWGBCheckTool::TCPActivePlay);
+    connect(ui.pushButton_11, &QPushButton::clicked, this, &AWGBCheckTool::clearInfo);
+    connect(ui.pushButton_12, &QPushButton::clicked, this, &AWGBCheckTool::clearList);
+    connect(ui.pushButton_36, &QPushButton::clicked, this, &AWGBCheckTool::reMain);
 }
 
 AWGBCheckTool::~AWGBCheckTool()
@@ -902,3 +905,40 @@ void AWGBCheckTool::TCPActivePlay()
     video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
 
 }
+
+void AWGBCheckTool::clearInfo(){
+    ui.textBrowser->clear();
+}
+
+void AWGBCheckTool::clearList(){
+    checkResModel->clear();
+    checkResModel->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("设备ID")));
+    checkResModel->setHorizontalHeaderItem(1, new QStandardItem(QObject::tr("设备类型")));
+    checkResModel->setHorizontalHeaderItem(2, new QStandardItem(QObject::tr("信令类型")));
+    checkResModel->setHorizontalHeaderItem(3, new QStandardItem(QObject::tr("状态")));
+    getThread->clearList();
+}
+
+void AWGBCheckTool::reMain(){
+    #include "ConfigureGuide.h"
+    QString c = "taskkill /im MediaServer.exe /f";
+    QProcess::execute(c);
+    c = "taskkill /im beanstalkd.exe /f";
+    QProcess::execute(c);
+    c = "taskkill /im AWGBBase.exe /f";
+    QProcess::execute(c);
+    QProcess* proBeanstalk = new QProcess();
+    QProcess* proMS = new QProcess();
+    QProcess* proBase = new QProcess();
+    proMS->start("MediaServer.exe");
+    proBeanstalk->start("beanstalkd.exe -l 127.0.0.1 -p 11300");
+    proBase->start("AWGBBase.exe");
+    pGBStart_s papa = (pGBStart_s)calloc(1, sizeof(GBStart_s));
+    int haha=0;
+    int ret = AW_BSQueue_Init(&haha, (unsigned char *)"127.0.0.1", 0, (unsigned char *)"Server",(unsigned char *)"Client");
+    ConfigureGuide *ICB = new ConfigureGuide(Q_NULLPTR, papa, haha);
+    ICB->setAttribute(Qt::WA_DeleteOnClose);
+    ICB->show();
+    this->close();
+}
+
