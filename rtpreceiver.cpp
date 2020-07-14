@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <thread>
+#include <QDebug>
 
 #include "jrtplib3/rtpsession.h"
 #include "jrtplib3/rtppacket.h"
@@ -161,6 +162,7 @@ void RtpReciever::start()
 {
     mIsStoped = false;
     channel->start();
+    qInfo() << "RtpReceiver Started!";
     //启动新的线程实现读取视频文件
     std::thread([&](RtpReciever *pointer)
     {
@@ -174,6 +176,7 @@ void RtpReciever::stop(bool isWait)
 {
     mIsStoped = true;
     channel->stop();
+    qInfo() << "RtpReceiver stopped";
     if (isWait)
     {
         while(mIsThreadRunning)
@@ -186,7 +189,6 @@ void RtpReciever::stop(bool isWait)
 void RtpReciever::run()
 {
 
-    std::cout << "------------- reciver 0-0 ----------" << std::endl;
 #ifdef RTP_SOCKETTYPE_WINSOCK
        WSADATA dat;
        WSAStartup(MAKEWORD(2, 2), &dat);
@@ -203,7 +205,6 @@ void RtpReciever::run()
     //解析帧数
     sessparams.SetOwnTimestampUnit(1.0 / 9000);
 //    sessparams.SetUsePollThread(true);
-std::cout << "------------- reciver 0-1 ----------" << std::endl;
     portbase = port;
     transparams.SetRTPReceiveBuffer(1024 * 1024 *30); //10M
 
@@ -217,7 +218,7 @@ std::cout << "------------- reciver 0-1 ----------" << std::endl;
     }
     //开始接收流包
     uint32_t ssrcbay=0;
-//    std::cout << "------------- reciver 0-2 ----------" << std::endl;
+    qInfo() << "Ready to receive rtp packet";
     while(!mIsStoped)
 //    while(1)
     {
@@ -227,7 +228,6 @@ std::cout << "------------- reciver 0-1 ----------" << std::endl;
         // check incoming packets
         if (sess.GotoFirstSource())
         {
-//            std::cout << "------------- destroyed 0 ----------" << std::endl;
             do
             {
                 RTPPacket *pack;
@@ -279,12 +279,13 @@ std::cout << "------------- reciver 0-1 ----------" << std::endl;
     struct timeval Timeout;
     Timeout.tv_sec = 0;
     Timeout.tv_usec = 500;
-    std::cout << "------------- destroyed 1 ----------" << std::endl;
+//    std::cout << "------------- destroyed 1 ----------" << std::endl;
     sess.BYEDestroy(RTPTime(Timeout.tv_sec, Timeout.tv_usec), 0, 0);
-    std::cout << "------------- destroyed ----------" << std::endl;
+//    std::cout << "------------- destroyed ----------" << std::endl;
+    qInfo() << "Rtp session destroyed";
 #ifdef WIN32
     WSACleanup();
-    std::cout << "------------- destroyed end----------" << std::endl;
+//    std::cout << "------------- destroyed end----------" << std::endl;
 #endif
     mIsThreadRunning = false;
 }

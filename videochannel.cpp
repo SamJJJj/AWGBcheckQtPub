@@ -207,10 +207,23 @@ void VideoChannel::threadStop()
 #if 1
 void VideoChannel::dealwithDataNode(const RtpDataNode &node)
 {
-    unsigned char *vkek_bak=(unsigned char *) calloc(16,1);
-    unsigned int vkek_lenbak=16;
-    unsigned char *pKeyversion_bak=(unsigned char *) calloc(16,1);
-    unsigned char *Pubkey_bak=(unsigned char *) calloc(16,1);
+//    cout << vkek.toStdString() << endl;
+//    cout << pubkey.toStdString() << endl;
+//    for(int i = 0; i < pubkey.length(); ++i)
+//    {
+//        printf("%x", pubkey.toStdString().c_str()[i]);
+//    }
+//    printf("\n--------------\n");
+//    cout << keyVersion.toStdString() << endl;
+//    for(int i = 0; i < vkek.length(); ++i)
+//    {
+//        printf("%x", vkek.toStdString().c_str()[i]);
+//    }
+//    printf("\n--------------\n");
+//    unsigned char *vkek_bak=(unsigned char *) calloc(16,1);
+//    unsigned int vkek_lenbak=16;
+//    unsigned char *pKeyversion_bak=(unsigned char *) calloc(16,1);
+//    unsigned char *Pubkey_bak=(unsigned char *) calloc(16,1);
     unsigned char *ptr = node.buffer;
     int psLen = node.size;
 
@@ -230,12 +243,24 @@ void VideoChannel::dealwithDataNode(const RtpDataNode &node)
 //                vkek_version[19] = '\0';
 
 
-//                SvacDecSetVkek(handle, vkek, vkek_version, 32);
-//                SvacDecSetPubkey(handle, (char*)Pubkey_bak);
+                SvacDecSetVkek(handle, vkek.data(), keyVersion.toLatin1().data(), 32);
+                SvacDecSetPubkey(handle, pubkey.data());
                 if (id == TEST_FRAME_NUM)
                     return;
-
+//                printf("----\n");
+//                for(int i = 0; i < 20; ++i)
+//                {
+//                    printf("%02x ",in_buff[i]);
+//                }
                 ret = SvacDecProcess(handle, in_buff, h264length, out_buff, &outFrameLen, &info);
+                printf("----\n");
+//                for(int i = 0; i < 20; ++i)
+//                {
+//                    printf("%02x ",out_buff[i]);
+//                }
+//                printf("----\n");
+//                printf("%d\n", ret);
+//                printf("----\n");
                 if (ret)
                 {
                     return;

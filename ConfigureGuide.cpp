@@ -192,7 +192,7 @@ int ConfigureGuide::CheackLen(QString sttr)
 }
 
 void ConfigureGuide::LineEditChange(){
-    ui.LineEdit_9->setText(tr(""));
+//    ui.LineEdit_9->setText(tr(""));
 }
 
 void ConfigureGuide::localIdCheck()
@@ -438,8 +438,15 @@ void ConfigureGuide::SetConfigure(void* param)
     char sendBuf[2048] = {0};
     makeDeviceInfoXml(res, sendBuf, true);
     ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
-    cout << "put:" << ret << endl;
+    if(!ret)
+    {
+        qInfo() << "Put init configure OK!";
+    }
+    else {
+        qWarning() << "Put init Configure failed";
+    }
     AWGBCheckTool *IC = new AWGBCheckTool(Q_NULLPTR, res, handle);
+    qInfo() << "Go to CheckTool page";
     IC->setAttribute(Qt::WA_DeleteOnClose);
     IC->show();
     IC->showST();

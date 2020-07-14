@@ -23,6 +23,9 @@ public:
     void init(QStandardItemModel*, QStandardItemModel*, int, QString *, QString *, QString *, QString *, QString *);
     void setMethod(const QString & );
     void clearList();
+    QString bvkek;
+    QString keyVersion;
+    QString bPubKey;
 protected:
     void run();
 signals:
@@ -33,6 +36,7 @@ signals:
     void UDP();
     void TCP();
     void TCPActive();
+    void svacKey();
 private:
     int handle;
     int tableId;
@@ -44,7 +48,6 @@ private:
     QStandardItemModel *checkResModel;
     QStandardItemModel *treeModel;
     QString *sipMessages;
-
 };
 
 //class ShowTree: public QThread
@@ -154,4 +157,5 @@ private slots:
     void clearInfo();
     void clearList();
     void reMain();
+    void recordInfo();
 };

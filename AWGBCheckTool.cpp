@@ -15,6 +15,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
+#include <QMetaType>
 using namespace std;
 
 
@@ -26,8 +27,10 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     AWGBCheckTool::SetList(param);
     currGBInfo = (pGBStart_s)calloc(1, sizeof(GBStart_s));
     memcpy(currGBInfo, param, sizeof(GBStart_s));
+    if(currGBInfo->modeType <= 3)
+        ui.pushButton_8->setEnabled(false);
     handle = h;
-    sipMessage = new QString();
+    sipMessage = new QString;
     getThread = new GetAndParseThread;
     udpReceiver = new RtpReciever;
     tcpListener = new TcpListener;
@@ -38,6 +41,7 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     pushMethod = new QString;
     pushId = new QString;
     video = new ShowVideo(ui.openGLWidget);
+
     checkResModel->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("设备ID")));
     checkResModel->setHorizontalHeaderItem(1, new QStandardItem(QObject::tr("设备类型")));
     checkResModel->setHorizontalHeaderItem(2, new QStandardItem(QObject::tr("信令类型")));
@@ -48,13 +52,14 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     ui.treeView->setModel(treeModel);
     ui.dateEdit->setCalendarPopup(true);
     ui.dateEdit_2->setCalendarPopup(true);
-    ui.dateEdit->setDateTime(QDateTime::currentDateTime());
-    ui.dateEdit_2->setDateTime(QDateTime::currentDateTime().addDays(365));
+    ui.dateEdit->setDateTime(QDateTime::currentDateTime().addDays(-1));
+    ui.dateEdit_2->setDateTime(QDateTime::currentDateTime());
     ui.timeEdit_3->setTime(QTime::currentTime());
-    ui.timeEdit_31->setTime(QTime::currentTime());
+    ui.timeEdit_4->setTime(QTime::currentTime());
     getThread->init(treeModel, checkResModel, h, sipMessage, ip, port, pushMethod, pushId);
     getThread->start();
-
+    qRegisterMetaType<QList<QPersistentModelIndex>>("QList<QPersistentModelIndex>");
+    qRegisterMetaType<QVector<int>>("QVector<int>");
     ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     connect(ui.tableView_2->model(), &QStandardItemModel::dataChanged, this, &AWGBCheckTool::dataChangedSlot);
     connect(ui.pushButton_8, &QPushButton::clicked, this, &AWGBCheckTool::deviceRegister);
@@ -80,14 +85,23 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(ui.pushButton_11, &QPushButton::clicked, this, &AWGBCheckTool::clearInfo);
     connect(ui.pushButton_12, &QPushButton::clicked, this, &AWGBCheckTool::clearList);
     connect(ui.pushButton_36, &QPushButton::clicked, this, &AWGBCheckTool::reMain);
+    connect(ui.pushButton_2, &QPushButton::clicked, this, &AWGBCheckTool::recordInfo);
 }
 
 AWGBCheckTool::~AWGBCheckTool()
 {
     getThread->terminate();
     udpReceiver->stop();
-//    pro->kill();
     delete video;
+    delete getThread;
+    delete udpReceiver;
+    delete sipMessage;
+    delete tcpListener;
+    delete currGBInfo;
+    delete ip;
+    delete port;
+    delete pushMethod;
+    delete pushId;
 }
 
 inline QString chooseModeType(int i)
@@ -96,8 +110,9 @@ inline QString chooseModeType(int i)
     case 0: return "IPC";
     case 1: return "NVR/DVR";
     case 2: return "解码器";
-    case 3: return "上级平台";
-    case 4: return "下级平台";
+    case 3: return "下级平台（作为上级）";
+    case 4: return "下级平台（作为IPC）";
+    case 5: return "上级平台";
     }
 }
 
@@ -109,10 +124,12 @@ inline int mode2Int(QString s)
         return 1;
     if(s == "解码器")
         return 2;
-    if(s == "上级平台")
+    if(s == "下级平台（作为上级）")
         return 3;
-    if(s == "下级平台")
+    if(s == "下级平台（作为IPC）")
         return 4;
+    if(s == "上级平台")
+        return 5;
     else
         return -1;
 }
@@ -150,32 +167,34 @@ void AWGBCheckTool::SetList(pGBStart_s param)
     student_model->setHorizontalHeaderItem(6, new QStandardItem(QObject::tr("有效期")));
     student_model->setHorizontalHeaderItem(7, new QStandardItem(QObject::tr("心跳间隔")));
     student_model->setHorizontalHeaderItem(8, new QStandardItem(QObject::tr("心跳次数")));
+    student_model->setHorizontalHeaderItem(9, new QStandardItem(QObject::tr("媒体端口")));
     QComboBox *comboBox = new QComboBox();
     comboBox->addItem("IPC");
     comboBox->addItem("NVR/DVR");
     //student_model->setItem(0, 1, QStandardItem(comboBox));
     if (param->protoType == 0){
-        student_model->setHorizontalHeaderItem(9, new QStandardItem(QObject::tr("文件路径")));
-        student_model->setHorizontalHeaderItem(10, new QStandardItem(QObject::tr("选择路径")));
+        student_model->setHorizontalHeaderItem(10, new QStandardItem(QObject::tr("文件路径")));
+        student_model->setHorizontalHeaderItem(11, new QStandardItem(QObject::tr("选择路径")));
     }else{
-        student_model->setHorizontalHeaderItem(9, new QStandardItem(QObject::tr("密码")));
+        student_model->setHorizontalHeaderItem(10, new QStandardItem(QObject::tr("密码")));
     }
     //利用setModel()方法将数据模型与QTableView绑定;
     for(int i = 0; i < 5; ++i)
     {
         student_model->setItem(i, 0, new QStandardItem(chooseModeType(i)));
-        student_model->setItem(i, 2, new QStandardItem(QString("00000000000000000000")));
-        student_model->setItem(i, 3, new QStandardItem(QString("192.168.0.1")));
+        student_model->setItem(i, 2, new QStandardItem(QString("34020000002000000001")));
+        student_model->setItem(i, 3, new QStandardItem(QString("192.168.0.98")));
         student_model->setItem(i, 4, new QStandardItem(QString("5060")));
-        student_model->setItem(i, 5, new QStandardItem(QString("0000000000")));
+        student_model->setItem(i, 5, new QStandardItem(QString("3402000000")));
         student_model->setItem(i, 6, new QStandardItem(QString("60")));
         student_model->setItem(i, 7, new QStandardItem(QString("10")));
         student_model->setItem(i, 8, new QStandardItem(QString("6")));
+        student_model->setItem(i, 9, new QStandardItem(QString("10002")));
         if (param->protoType == 0){
             student_model->setItem(i, 1, new QStandardItem(chooseAuthMode(0)));
-            student_model->setItem(i, 9, new QStandardItem(QString("path")));
+            student_model->setItem(i, 10, new QStandardItem(QString("path")));
         }else{
-            student_model->setItem(i, 9, new QStandardItem(QString("passwd")));
+            student_model->setItem(i, 10, new QStandardItem(QString("passwd")));
         }
     }
     //    ui.tableView_2->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -185,8 +204,8 @@ void AWGBCheckTool::SetList(pGBStart_s param)
         for(int i = 0; i < 5; ++i)
         {
             QPushButton* c_button = new QPushButton("path");
-            ui.tableView_2->setIndexWidget(student_model->index(i, 10), c_button);
-            connect(c_button, &QPushButton::clicked, this, [=]{ButtonCli(param);student_model->setItem(i, 9, new QStandardItem(QString(QString::fromStdString(string((char*)param->path)))));
+            ui.tableView_2->setIndexWidget(student_model->index(i, 11), c_button);
+            connect(c_button, &QPushButton::clicked, this, [=]{ButtonCli(param);student_model->setItem(i, 10, new QStandardItem(QString(QString::fromStdString(string((char*)param->path)))));
                 ui.tableView_2->setModel(student_model);});
         }
     }
@@ -195,7 +214,8 @@ void AWGBCheckTool::SetList(pGBStart_s param)
 
 void AWGBCheckTool::showInCurrentInterface()
 {
-    ui.pushButton_8->setEnabled(true);
+    if(currGBInfo->modeType >3)
+        ui.pushButton_8->setEnabled(true);
     int curRow=ui.tableView_2->currentIndex().row();
     QAbstractItemModel *modessl = ui.tableView_2->model();
     QModelIndex indextemp = modessl->index(curRow, 2);
@@ -483,6 +503,11 @@ void AWGBCheckTool::deviceRegister()
 
     indextemp = modessl->index(curRow, 9);
     datatemp = modessl->data(indextemp);
+    strcpy(content->mediaPort, datatemp.toString().toLatin1().data());
+    content->mediaPortLen = datatemp.toString().length();
+
+    indextemp = modessl->index(curRow, 10);
+    datatemp = modessl->data(indextemp);
     if(datatemp.toString().length() != 0)
     {
         strcpy(content->path, datatemp.toString().toLatin1().data());
@@ -497,6 +522,33 @@ void AWGBCheckTool::deviceRegister()
     int ret = 0;
     makeDeviceInfoXml(content, buf, false);
     ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
+    if(!ret)
+    {
+        qInfo() << "Send devInfo(before register) success";
+    }
+    else {
+        qWarning() << "Send devInfo(before register) failed";
+    }
+    QDomDocument doc;
+    QDomElement root=doc.createElement("Request");
+    doc.appendChild(root);
+
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("SipCmd");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+
+    QDomElement sipCmd = doc.createElement("SipCmd");
+    QDomText sipCmdText = doc.createTextNode("Register");
+    sipCmd.appendChild(sipCmdText);
+    root.appendChild(sipCmd);
+
+    QDomElement deviceId = doc.createElement("DeviceId");
+    QDomText deviceIdText = doc.createTextNode(ui.lineEdit->text());
+    deviceId.appendChild(deviceIdText);
+    root.appendChild(deviceId);
+
+    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().size());
     //    cout << ret << endl;
     free(content);
 }
@@ -505,6 +557,7 @@ void AWGBCheckTool::deviceCatalog()
 {
     ui.label_3->setText("目录查询");
     QString currentChannel = ui.lineEdit->text();
+    qInfo() << "send Catalog for: " << currentChannel;
     QDomDocument doc;
     QDomElement root = doc.createElement("Request");
     doc.appendChild(root);
@@ -523,7 +576,7 @@ void AWGBCheckTool::deviceCatalog()
 
     int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().length());
     if(!ret)
-        cout << "send catalog ok!!" << endl;
+        qInfo() << "Send catalog success";
 }
 
 
@@ -638,7 +691,7 @@ void AWGBCheckTool::playVideo()
         root.appendChild(sipCmd);
         int ret = AW_BSQueue_PutBuffer(handle, (unsigned char*)doc.toString().toStdString().c_str(), doc.toString().length());
         if(!ret)
-            cout << "decode play send OK!" << endl;
+            qInfo() << "decode invite send to backend!";
         ui.pushButton_24->setEnabled(false);
     }
     else
@@ -654,21 +707,24 @@ void AWGBCheckTool::playVideo()
             makeDeviceInviteXml(sendBuf,  "UDP", deId);
             ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
             getThread->setMethod("UDP");
-            cout << "UDP mode" << endl;
+            if(!ret)
+                qInfo() << "UDP mode invite send to backend";
             break;
         case 1:
             makeDeviceInviteXml(sendBuf, "TCP_Active", deId);
             ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
             //            cout << "TCP 主动" << endl;
             getThread->setMethod("TCP_Active");
-            cout << "TCP_Active mode" << endl;
+            if(!ret)
+                qInfo() << "TCP_Active mode invite send to backend";
             break;
         case 2:
             makeDeviceInviteXml(sendBuf, "TCP", deId);
             ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
             //            cout << "TCP 被动" << endl;
             getThread->setMethod("TCP");
-            cout << "TCP mode" << endl;
+            if(!ret)
+                qInfo() << "TCP mode invite send to backend";
             break;
             }
      }
@@ -688,6 +744,7 @@ void AWGBCheckTool::gotoMatchBuffer()
 
 void AWGBCheckTool::pushStream()
 {
+    qInfo() << "Receive pushstream from backend";
     QString url = "";
     int choice;         //choice换成string放在最后当参数
     if(*pushMethod == QString("UDP")){
@@ -722,10 +779,11 @@ void AWGBCheckTool::pushStream()
     cout << bytes.toStdString() << endl;
     if(bytes[14].operator!=('0'))
     {
-        cout << "register mp4 failed" << endl;
+        qCritical() << "Register mp4 file failed!";
         return;
     }
     request.setUrl((QUrl(url)));
+    qInfo() << "Push used url:" << url;
     pReply = manager->get(request);
     QObject::connect(manager, &QNetworkAccessManager::finished, &eventLoop, &QEventLoop::quit);
     eventLoop.exec();
@@ -819,32 +877,35 @@ void AWGBCheckTool::stopVideo(){
     root.appendChild(deviceId);
     int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().length());
     if(!ret)
-        cout << "Bye send OK!" << endl;
-//发bye    makeDeviceStopXml(deId, sendBuf);
-    //int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)sendBuf, strlen(sendBuf));
-    //udpReceiver->channel->stop();
+        qInfo() << "Send Bye to backend";
+
+
     tcpListener->channel->stop();
     tcpListener->stop();
-//    udpReceiver->stop();
-//    udpReceiver->channel->clearData();
-//    getThread->quit();
     udpReceiver->stop();
-//    udpReceiver->channel->stop();
-    //Sleep(1000);
 
     video->clear();
+    qInfo() << "Video play stopped";
     ui.pushButton_24->setEnabled(true);
     ui.comboBox_3->setEnabled(true);
 }
 
 void AWGBCheckTool::UDPPlay()
 {
-    if(ui.comboBox_4->currentIndex())
+    if(ui.comboBox_4->currentIndex() == 1)
     {
         udpReceiver->channel->videotype = 2;
+        if(currGBInfo->protoType == 0)
+        {
+            udpReceiver->channel->pubkey = QByteArray::fromBase64(getThread->bPubKey.toLocal8Bit());
+            udpReceiver->channel->vkek = QByteArray::fromBase64(getThread->bvkek.toLocal8Bit());
+            udpReceiver->channel->keyVersion = getThread->keyVersion.split(".")[0];
+            qInfo() << "Start play in udp, svac";
+        }
     }
     else {
         udpReceiver->channel->videotype = 0;
+        qInfo() << "Start play in udp, h264";
     }
     udpReceiver->channel->setEventHandle(video);
     udpReceiver->setPort(atoi((char *)currGBInfo->mediaPort));
@@ -854,7 +915,7 @@ void AWGBCheckTool::UDPPlay()
     int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
     cout << buf <<endl;
     if(!ret)
-        cout << "UDPPlay send ACK OK!" << endl;
+        qInfo() << "Send Ack to backend, UDP mode";
     video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
     free(buf);
 }
@@ -877,7 +938,7 @@ void AWGBCheckTool::TCPPlay()
     makeDevInfoAck(buf, ui.lineEdit->text());
     int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
     if(!ret)
-        cout << "TCPPlay send ACK OK!" << endl;
+        qInfo() << "Send Ack to backend, TCP mode";
     video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
 }
 
@@ -901,7 +962,7 @@ void AWGBCheckTool::TCPActivePlay()
     makeDevInfoAck(buf, ui.lineEdit->text());
     int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
     if(!ret)
-        cout << "TCPActive Play send ACK OK!" << endl;
+        qInfo() << "Send Ack to backend, TCP Active mode";
     video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
 
 }
@@ -920,7 +981,7 @@ void AWGBCheckTool::clearList(){
 }
 
 void AWGBCheckTool::reMain(){
-    #include "ConfigureGuide.h"
+    qInfo() << "Reconfigure application";
     QString c = "taskkill /im MediaServer.exe /f";
     QProcess::execute(c);
     c = "taskkill /im beanstalkd.exe /f";
@@ -942,3 +1003,43 @@ void AWGBCheckTool::reMain(){
     this->close();
 }
 
+void AWGBCheckTool::recordInfo()
+{
+    QDomDocument doc;
+    QDomElement root = doc.createElement("Request");
+    doc.appendChild(root);
+
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("SipCmd");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+
+    QDomElement sipCmd = doc.createElement("SipCmd");
+    QDomText sipCmdText = doc.createTextNode("RecordInfo");
+    sipCmd.appendChild(sipCmdText);
+    root.appendChild(sipCmd);
+
+    QDomElement deviceId = doc.createElement("DeviceId");
+    QDomText deviceIdText = doc.createTextNode(treeModel->takeItem(0)->text().split("(")[0]);
+    deviceId.appendChild(deviceIdText);
+    root.appendChild(deviceId);
+
+    QDomElement start = doc.createElement("StartTime");
+    QDomText startText = doc.createTextNode(ui.dateEdit->text().replace('/', '-') + "T" + ui.timeEdit_3->text() + ":00");
+    start.appendChild(startText);
+    root.appendChild(start);
+
+    QDomElement end = doc.createElement("EndTime");
+    QDomText endText = doc.createTextNode(ui.dateEdit_2->text().replace('/', '-') + "T" + ui.timeEdit_4->text() + ":00");
+    end.appendChild(endText);
+    root.appendChild(end);
+
+    QDomElement type = doc.createElement("Type");
+    QDomText typeText = doc.createTextNode(ui.comboBox->currentText());
+    type.appendChild(typeText);
+    root.appendChild(type);
+    int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().length());
+    if(!ret)
+        qInfo() << "Send RecordInfo to backend!";
+    cout << doc.toString().toStdString() << endl;
+}

@@ -48,10 +48,11 @@ void GetAndParseThread::run()
     {
         bool flag = true;
         Sleep(100);
-        ret = AW_BSQueue_GetBuffer(handle, buf, &len);
+        ret = AW_BSQueue_GetBuffer(handle, NULL, &len);
         if(!ret)
         {
             //解析发来的数据，放进结构体，setModel, 发信号
+            ret = AW_BSQueue_GetBuffer(handle, buf, &len);
             QDomDocument doc;
             doc.setContent(QString((char*)buf));
             QDomNodeList list = doc.elementsByTagName("CmdType");
@@ -89,7 +90,7 @@ void GetAndParseThread::run()
                 checkResModel->setItem(tableId, 2, new QStandardItem(text));
                 text.clear();
                 list = doc.elementsByTagName("State");
-                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                    list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
                 if(text.isEmpty())
                 {
                     flag = false;
@@ -108,7 +109,7 @@ void GetAndParseThread::run()
                     ++tableId;
                     //cout << tableId << endl;
                 }
-
+                qInfo() << "Get sipshowbuffer";
                 emit toText();
             }
             else if(str == QString("DeviceTree"))
@@ -156,6 +157,7 @@ void GetAndParseThread::run()
                 deCount ++;
                 treeModel->appendRow(itemC);
                 }
+                qInfo() << "Get DeviceTree";
                 emit toTree();
                 str.clear();
 
@@ -183,6 +185,7 @@ void GetAndParseThread::run()
                 list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
                 *pushMethod = text;
                 text.clear();
+                qInfo() << "Get PushStream";
                 emit push();
                 str.clear();
             }
@@ -204,8 +207,25 @@ void GetAndParseThread::run()
                 *port = text;
                 text.clear();
 
+                list = doc.elementsByTagName("Bvkek");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                bvkek = text;
+                text.clear();
+
+                list = doc.elementsByTagName("Keyversion");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                keyVersion = text;
+                text.clear();
+
+                list = doc.elementsByTagName("Bpubkey");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                bPubKey = text;
+//                std::cout << bPubKey.toStdString() << std::endl;
+                text.clear();
+
                 list = doc.elementsByTagName("Method");
                 list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                qInfo() << "Get PullStream";
                 if(method == QString("UDP"))
                     emit UDP();
                 else if(method == QString("TCP"))
@@ -218,6 +238,16 @@ void GetAndParseThread::run()
                 text.clear();
                 str.clear();
             }
+            else if(str == "RecordInfo"){
+                QString text;
+                QTextStream streamText(&text);
+                list = doc.elementsByTagName("FilePath");
+                //filePath到底有几个？？，最好按一个组装
+            }
+//            else if(str == "")
+//            {
+
+//            }
             cout << "AW_BSQueue_GetBuffer"<< endl;
             cout << len << endl;
             memset(buf, 0, 2048);

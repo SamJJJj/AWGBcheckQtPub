@@ -54,7 +54,7 @@ void ShowVideo::inputOneFrame(const QImage &img)
 
 void ShowVideo::clear()
 {
-    Sleep(100);
+    Sleep(500);
     QPainter painter(this);
     painter.setBrush(Qt::black);
     painter.drawRect(0, 0, this->width(), this->height());

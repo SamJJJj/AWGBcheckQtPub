@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <list>
+#include <QString>
 
 #include "mutex.h"
 #include "DataListThread.h"
@@ -80,9 +81,12 @@ public:
     int filelen = 0;
     int ret;
     char *in_buff, *out_buff;
+    QByteArray vkek;
+    QString keyVersion;
+    QByteArray pubkey;
 
-    char vkek[16];
-    char vkek_version[32];
+//    char vkek[16];
+//    char vkek_version[32];
     struct auth_info info;
     int videotype;
 

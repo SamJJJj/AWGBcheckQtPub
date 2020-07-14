@@ -149,12 +149,17 @@
             </item>
             <item>
              <property name="text">
-              <string>上级平台</string>
+              <string>下级平台(作为上级)</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>下级平台</string>
+              <string>下级平台(作为IPC)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>上级平台</string>
              </property>
             </item>
            </widget>
