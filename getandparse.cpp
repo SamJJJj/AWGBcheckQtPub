@@ -244,10 +244,14 @@ void GetAndParseThread::run()
                 list = doc.elementsByTagName("FilePath");
                 //filePath到底有几个？？，最好按一个组装
             }
-//            else if(str == "")
-//            {
-
-//            }
+            else if(str == "RegisterOK")
+            {
+                emit registerOk();
+            }
+            else if(str == "unRegisterOK")
+            {
+                emit unRegisterOk();
+            }
             cout << "AW_BSQueue_GetBuffer"<< endl;
             cout << len << endl;
             memset(buf, 0, 2048);

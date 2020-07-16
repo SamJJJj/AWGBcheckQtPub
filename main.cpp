@@ -6,6 +6,7 @@
 #include <QtXml/QDomComment>
 #include <QtXml/QDomElement>
 #include <QtXml/QDomNodeList>
+#include <QTextCodec>
 #include "AWQueue.h"
 #include "AWGBCheckTool.h"
 #include "ConfigureGuide.h"
@@ -69,6 +70,7 @@ int main(int argc, char *argv[])
 {
     qInstallMessageHandler(outputMessage);
     int ret;
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QString c = "taskkill /im MediaServer.exe /f";
     ret = QProcess::execute(c);
     if(!ret)
@@ -76,13 +78,13 @@ int main(int argc, char *argv[])
         qWarning() << "LastTime application aborted, MediaServer killed, ready to start MediaServer";
     }
     c = "taskkill /im beanstalkd.exe /f";
-    ret = QProcess::execute(c);
+//    ret = QProcess::execute(c);
     if(!ret)
     {
         qWarning() << "LastTime application aborted, MediaServer killed, ready to start beanstalkd";
     }
     c = "taskkill /im AWGBBase.exe /f";
-    ret = QProcess::execute(c);
+//    ret = QProcess::execute(c);
     if(!ret)
     {
         qWarning() << "LastTime application aborted, MediaServer killed, ready to start AWGBBase";
@@ -93,8 +95,8 @@ int main(int argc, char *argv[])
     QProcess* proBase = new QProcess();
     int handle;
     proMS->start("MediaServer.exe");
-    proBeanstalk->start("beanstalkd.exe -l 127.0.0.1 -p 11300");
-    proBase->start("AWGBBase.exe");
+//    proBeanstalk->start("beanstalkd.exe -l 127.0.0.1 -p 11300");
+//    proBase->start("AWGBBase.exe");
     ret = AW_BSQueue_Init(&handle, (unsigned char *)"127.0.0.1", 0, (unsigned char *)"Server",(unsigned char *)"Client");
     if(ret == 0)
         qInfo() << "AWQueue init OK";
@@ -125,6 +127,7 @@ int main(int argc, char *argv[])
         qWarning() << "beanstalkd aborted";
     }
     c = "taskkill /im AWGBBase.exe /f";
+    QProcess::execute(c);
     if(!ret)
     {
         qInfo() << "AWGBBase exited";
@@ -132,7 +135,7 @@ int main(int argc, char *argv[])
     else {
         qWarning() << "AWGBBase aborted";
     }
-    QProcess::execute(c);
+
     AW_BSQueue_Destroy(handle);
     qInfo() << "Application exited";
     return 0;

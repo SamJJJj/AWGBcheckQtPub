@@ -37,6 +37,8 @@ signals:
     void TCP();
     void TCPActive();
     void svacKey();
+    void registerOk();
+    void unRegisterOk();
 private:
     int handle;
     int tableId;
@@ -158,4 +160,5 @@ private slots:
     void clearList();
     void reMain();
     void recordInfo();
+    void changeRegisterStatus();
 };

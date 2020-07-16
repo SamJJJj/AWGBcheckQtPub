@@ -16,6 +16,7 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QMetaType>
+#include <QCoreApplication>
 using namespace std;
 
 
@@ -86,6 +87,8 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(ui.pushButton_12, &QPushButton::clicked, this, &AWGBCheckTool::clearList);
     connect(ui.pushButton_36, &QPushButton::clicked, this, &AWGBCheckTool::reMain);
     connect(ui.pushButton_2, &QPushButton::clicked, this, &AWGBCheckTool::recordInfo);
+    connect(getThread, &GetAndParseThread::registerOk, this, &AWGBCheckTool::changeRegisterStatus);
+    connect(getThread, &GetAndParseThread::unRegisterOk, this, &AWGBCheckTool::changeRegisterStatus);
 }
 
 AWGBCheckTool::~AWGBCheckTool()
@@ -183,7 +186,7 @@ void AWGBCheckTool::SetList(pGBStart_s param)
     {
         student_model->setItem(i, 0, new QStandardItem(chooseModeType(i)));
         student_model->setItem(i, 2, new QStandardItem(QString("34020000002000000001")));
-        student_model->setItem(i, 3, new QStandardItem(QString("192.168.0.98")));
+        student_model->setItem(i, 3, new QStandardItem(QString("192.168.0.108")));
         student_model->setItem(i, 4, new QStandardItem(QString("5060")));
         student_model->setItem(i, 5, new QStandardItem(QString("3402000000")));
         student_model->setItem(i, 6, new QStandardItem(QString("60")));
@@ -455,102 +458,141 @@ void AWGBCheckTool::deviceRegister()
     ui.pushButton_6->setEnabled(true);
     ui.pushButton_7->setEnabled(true);
     ui.label_3->setText("注册");
-    pGBStart_s content = (pGBStart_s)calloc(1, sizeof(pGBStart_S));
-    QAbstractItemModel *modessl = ui.tableView_2->model();
-    QModelIndex indextemp = modessl->index(curRow, 0);
-    QVariant datatemp = modessl->data(indextemp);
-    content->modeType = mode2Int(datatemp.toString());
-
-    indextemp = modessl->index(curRow, 1);
-    datatemp = modessl->data(indextemp);
-    content->authMethod = proto2Int(datatemp.toString());
-    indextemp = modessl->index(curRow, 2);
-    datatemp = modessl->data(indextemp);
-    if(datatemp.toString().length() != 0)
+    if(ui.pushButton_8->text() == "注册")
     {
-        strcpy(content->localId, datatemp.toString().toLatin1().data());
-        content->localIdLen = datatemp.toString().length();
-    }
-    indextemp = modessl->index(curRow, 3);
-    datatemp = modessl->data(indextemp);
-    strcpy(content->localIp, datatemp.toString().toLatin1().data());
-    content->localIpLen = datatemp.toString().length();
+        pGBStart_s content = (pGBStart_s)calloc(1, sizeof(pGBStart_S));
+        QAbstractItemModel *modessl = ui.tableView_2->model();
+        QModelIndex indextemp = modessl->index(curRow, 0);
+        QVariant datatemp = modessl->data(indextemp);
+        content->modeType = mode2Int(datatemp.toString());
 
-    indextemp = modessl->index(curRow, 4);
-    datatemp = modessl->data(indextemp);
-    strcpy(content->localPort, datatemp.toString().toLatin1().data());
-    content->localPortLen = datatemp.toString().length();
+        indextemp = modessl->index(curRow, 1);
+        datatemp = modessl->data(indextemp);
+        content->authMethod = proto2Int(datatemp.toString());
+        indextemp = modessl->index(curRow, 2);
+        datatemp = modessl->data(indextemp);
+        if(datatemp.toString().length() != 0)
+        {
+            strcpy(content->localId, datatemp.toString().toLatin1().data());
+            content->localIdLen = datatemp.toString().length();
+        }
+        indextemp = modessl->index(curRow, 3);
+        datatemp = modessl->data(indextemp);
+        strcpy(content->localIp, datatemp.toString().toLatin1().data());
+        content->localIpLen = datatemp.toString().length();
 
-    indextemp = modessl->index(curRow, 5);
-    datatemp = modessl->data(indextemp);
-    strcpy(content->localArea, datatemp.toString().toLatin1().data());
-    content->localAreaLen = datatemp.toString().length();
+        indextemp = modessl->index(curRow, 4);
+        datatemp = modessl->data(indextemp);
+        strcpy(content->localPort, datatemp.toString().toLatin1().data());
+        content->localPortLen = datatemp.toString().length();
 
-    indextemp = modessl->index(curRow, 6);
-    datatemp = modessl->data(indextemp);
-    strcpy(content->validTime, datatemp.toString().toLatin1().data());
-    content->validTimeLen = datatemp.toString().length();
+        indextemp = modessl->index(curRow, 5);
+        datatemp = modessl->data(indextemp);
+        strcpy(content->localArea, datatemp.toString().toLatin1().data());
+        content->localAreaLen = datatemp.toString().length();
 
-    indextemp = modessl->index(curRow, 7);
-    datatemp = modessl->data(indextemp);
-    strcpy(content->beatTime, datatemp.toString().toLatin1().data());
-    content->beatTimeLen = datatemp.toString().length();
+        indextemp = modessl->index(curRow, 6);
+        datatemp = modessl->data(indextemp);
+        strcpy(content->validTime, datatemp.toString().toLatin1().data());
+        content->validTimeLen = datatemp.toString().length();
 
-    indextemp = modessl->index(curRow, 8);
-    datatemp = modessl->data(indextemp);
-    strcpy(content->beatCnt, datatemp.toString().toLatin1().data());
-    content->beatCntLen = datatemp.toString().length();
+        indextemp = modessl->index(curRow, 7);
+        datatemp = modessl->data(indextemp);
+        strcpy(content->beatTime, datatemp.toString().toLatin1().data());
+        content->beatTimeLen = datatemp.toString().length();
 
-    indextemp = modessl->index(curRow, 9);
-    datatemp = modessl->data(indextemp);
-    strcpy(content->mediaPort, datatemp.toString().toLatin1().data());
-    content->mediaPortLen = datatemp.toString().length();
+        indextemp = modessl->index(curRow, 8);
+        datatemp = modessl->data(indextemp);
+        strcpy(content->beatCnt, datatemp.toString().toLatin1().data());
+        content->beatCntLen = datatemp.toString().length();
 
-    indextemp = modessl->index(curRow, 10);
-    datatemp = modessl->data(indextemp);
-    if(datatemp.toString().length() != 0)
-    {
-        strcpy(content->path, datatemp.toString().toLatin1().data());
-        content->pathLen = datatemp.toString().length();
+        indextemp = modessl->index(curRow, 9);
+        datatemp = modessl->data(indextemp);
+        strcpy(content->mediaPort, datatemp.toString().toLatin1().data());
+        content->mediaPortLen = datatemp.toString().length();
+
+        indextemp = modessl->index(curRow, 10);
+        datatemp = modessl->data(indextemp);
+        if(datatemp.toString().length() != 0)
+        {
+            strcpy(content->path, datatemp.toString().toLatin1().data());
+            content->pathLen = datatemp.toString().length();
+        }
+        else {
+            strcpy(content->passwd, datatemp.toString().toLatin1().data());
+            content->passwdLen = datatemp.toString().length();
+        }
+        cout << "copy ok" << endl;
+        char buf[1024] = {0};
+        int ret = 0;
+        makeDeviceInfoXml(content, buf, false);
+        ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
+        if(!ret)
+        {
+            qInfo() << "Send devInfo(before register) success";
+        }
+        else {
+            qWarning() << "Send devInfo(before register) failed";
+        }
+        QDomDocument doc;
+        QDomElement root=doc.createElement("Request");
+        doc.appendChild(root);
+
+        QDomElement cmdType = doc.createElement("CmdType");
+        QDomText cmdTypeText = doc.createTextNode("SipCmd");
+        cmdType.appendChild(cmdTypeText);
+        root.appendChild(cmdType);
+
+        QDomElement sipCmd = doc.createElement("SipCmd");
+        QDomText sipCmdText = doc.createTextNode("Register");
+        sipCmd.appendChild(sipCmdText);
+        root.appendChild(sipCmd);
+
+        QDomElement deviceId = doc.createElement("DeviceId");
+        if(ui.lineEdit->text().isEmpty())
+        {
+            //弹messageBox，返回
+            QString a = "请选择一个设备";
+            QMessageBox::information(this, "information", a);
+            free(content);
+            return ;
+        }
+        QDomText deviceIdText = doc.createTextNode(ui.lineEdit->text());
+        deviceId.appendChild(deviceIdText);
+        root.appendChild(deviceId);
+
+        ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().size());
+        //    cout << ret << endl;
+        free(content);
     }
     else {
-        strcpy(content->passwd, datatemp.toString().toLatin1().data());
-        content->passwdLen = datatemp.toString().length();
+        QDomDocument doc;
+        QDomElement root=doc.createElement("Request");
+        doc.appendChild(root);
+
+        QDomElement cmdType = doc.createElement("CmdType");
+        QDomText cmdTypeText = doc.createTextNode("SipCmd");
+        cmdType.appendChild(cmdTypeText);
+        root.appendChild(cmdType);
+
+        QDomElement sipCmd = doc.createElement("SipCmd");
+        QDomText sipCmdText = doc.createTextNode("UnRegister");
+        sipCmd.appendChild(sipCmdText);
+        root.appendChild(sipCmd);
+
+        QDomElement deviceId = doc.createElement("DeviceId");
+        if(ui.lineEdit->text().isEmpty())
+        {
+            //弹messageBox，返回
+            QString a = "请选择一个设备";
+            QMessageBox::information(this, "information", a);
+            return ;
+        }
+        QDomText deviceIdText = doc.createTextNode(ui.lineEdit->text());
+        deviceId.appendChild(deviceIdText);
+        root.appendChild(deviceId);
+        AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().size());
     }
-    cout << "copy ok" << endl;
-    char buf[1024] = {0};
-    int ret = 0;
-    makeDeviceInfoXml(content, buf, false);
-    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
-    if(!ret)
-    {
-        qInfo() << "Send devInfo(before register) success";
-    }
-    else {
-        qWarning() << "Send devInfo(before register) failed";
-    }
-    QDomDocument doc;
-    QDomElement root=doc.createElement("Request");
-    doc.appendChild(root);
-
-    QDomElement cmdType = doc.createElement("CmdType");
-    QDomText cmdTypeText = doc.createTextNode("SipCmd");
-    cmdType.appendChild(cmdTypeText);
-    root.appendChild(cmdType);
-
-    QDomElement sipCmd = doc.createElement("SipCmd");
-    QDomText sipCmdText = doc.createTextNode("Register");
-    sipCmd.appendChild(sipCmdText);
-    root.appendChild(sipCmd);
-
-    QDomElement deviceId = doc.createElement("DeviceId");
-    QDomText deviceIdText = doc.createTextNode(ui.lineEdit->text());
-    deviceId.appendChild(deviceIdText);
-    root.appendChild(deviceId);
-
-    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().size());
-    //    cout << ret << endl;
-    free(content);
 }
 
 void AWGBCheckTool::deviceCatalog()
@@ -765,7 +807,7 @@ void AWGBCheckTool::pushStream()
     //http://127.0.0.1/index/api/bind_GBRtpSsrc?client_ip=192.168.0.92&client_port=4001&GBrtpSSRC=1
     //关闭
     //http://127.0.0.1/index/api/close_pushGB28181Rtp?schema=rtp&vhost=__defaultVhost__&app=rtp&stream=1&PushUrl=rtp://192.168.0.92:8000
-    QString url1 = "http://127.0.0.1/index/api/push_MP4toStream?Mp4Path=D:\\test.mp4&app=rtp&stream=1";
+    QString url1 = "http://127.0.0.1/index/api/push_MP4toStream?Mp4Path="+ QDir::currentPath() +"/test.mp4&app=rtp&stream=1";
     QNetworkAccessManager *manager = new QNetworkAccessManager();
     QNetworkRequest request;
     request.setUrl(QUrl(url1));
@@ -835,26 +877,6 @@ void makeDevInfoAck(char * buf, QString deId)
 
 
 void AWGBCheckTool::stopVideo(){
-    char sendBuf[2048] = {0};
-    QString deId = ui.lineEdit->text();
-//    QString urlS = "http://127.0.0.1/index/api/close_pushGB28181Rtp?schema=rtp&vhost=__defaultVhost__&app=rtp&stream=1&PushUrl=rtp://"+*ip+":" + *port;
-//    QNetworkAccessManager *manager = new QNetworkAccessManager();
-//    QNetworkRequest request;
-//    request.setUrl(QUrl(urlS));
-//    QNetworkReply *pReply = manager->get(request);
-//    // 开启一个局部的事件循环，等待页面响应结束
-//    QEventLoop eventLoop;
-//    QObject::connect(manager, &QNetworkAccessManager::finished, &eventLoop, &QEventLoop::quit);
-//    eventLoop.exec();
-//    // 获取网页Body中的内容
-//    QByteArray bytes = pReply->readAll();
-//    cout << bytes.toStdString() << endl;
-//    if(bytes[14].operator!=('0'))
-//    {
-//        cout << "stop failed" << endl;
-//        ui.pushButton_24->setEnabled(true);
-//        return;
-//    }
     QDomDocument doc;
     QDomElement root = doc.createElement("Request");
     doc.appendChild(root);
@@ -878,8 +900,6 @@ void AWGBCheckTool::stopVideo(){
     int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().length());
     if(!ret)
         qInfo() << "Send Bye to backend";
-
-
     tcpListener->channel->stop();
     tcpListener->stop();
     udpReceiver->stop();
@@ -888,6 +908,26 @@ void AWGBCheckTool::stopVideo(){
     qInfo() << "Video play stopped";
     ui.pushButton_24->setEnabled(true);
     ui.comboBox_3->setEnabled(true);
+    char sendBuf[2048] = {0};
+    QString deId = ui.lineEdit->text();
+    QString urlS = "http://127.0.0.1/index/api/close_pushGB28181Rtp?schema=rtp&vhost=__defaultVhost__&app=rtp&stream=1&PushUrl=rtp://"+*ip+":" + *port;
+    QNetworkAccessManager *manager = new QNetworkAccessManager();
+    QNetworkRequest request;
+    request.setUrl(QUrl(urlS));
+    QNetworkReply *pReply = manager->get(request);
+    // 开启一个局部的事件循环，等待页面响应结束
+    QEventLoop eventLoop;
+    QObject::connect(manager, &QNetworkAccessManager::finished, &eventLoop, &QEventLoop::quit);
+    eventLoop.exec();
+    // 获取网页Body中的内容
+    QByteArray bytes = pReply->readAll();
+    cout << bytes.toStdString() << endl;
+    if(bytes[14].operator!=('0'))
+    {
+        qInfo() << "stop push stream failed";
+        ui.pushButton_24->setEnabled(true);
+        return;
+    }
 }
 
 void AWGBCheckTool::UDPPlay()
@@ -1042,4 +1082,15 @@ void AWGBCheckTool::recordInfo()
     if(!ret)
         qInfo() << "Send RecordInfo to backend!";
     cout << doc.toString().toStdString() << endl;
+}
+
+void AWGBCheckTool::changeRegisterStatus()
+{
+    if(ui.pushButton_8->text() == "注册")
+    {
+        ui.pushButton_8->setText("注销");
+    }
+    else {
+        ui.pushButton_8->setText("注册");
+    }
 }
