@@ -9,7 +9,7 @@ QT       += core gui\
             network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-LIBS += libws2_32 libAdvapi32 -lpthread libwsock32
+LIBS += libws2_32 libAdvapi32 -lpthread libwsock32 -liconv
 TARGET = AWGBCheckTool
 TEMPLATE = app
 

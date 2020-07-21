@@ -37,18 +37,27 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     tcpListener = new TcpListener;
     treeModel = new QStandardItemModel(ui.treeView);
     checkResModel = new QStandardItemModel(ui.tableView);
+    fileModel = new QStandardItemModel(ui.tableView_3);//都显示哪些字段？？
     ip = new QString;
     port = new QString;
     pushMethod = new QString;
     pushId = new QString;
     video = new ShowVideo(ui.openGLWidget);
-
+    recordVideo = new ShowVideo(ui.openGLWidget_2);
+    isRecordPlay = false;
+    fileModel->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("视频编号")));
+    fileModel->setHorizontalHeaderItem(1, new QStandardItem(QObject::tr("通道ID")));
+    fileModel->setHorizontalHeaderItem(2, new QStandardItem(QObject::tr("录像开始时间")));
+    fileModel->setHorizontalHeaderItem(3, new QStandardItem(QObject::tr("录像结束时间")));
     checkResModel->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("设备ID")));
     checkResModel->setHorizontalHeaderItem(1, new QStandardItem(QObject::tr("设备类型")));
     checkResModel->setHorizontalHeaderItem(2, new QStandardItem(QObject::tr("信令类型")));
     checkResModel->setHorizontalHeaderItem(3, new QStandardItem(QObject::tr("状态")));
     ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui.tableView->setModel(checkResModel);
+    ui.tableView_3->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui.tableView_3->setModel(fileModel);
+    ui.tableView_3->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     treeModel->setHorizontalHeaderLabels(QStringList() << QStringLiteral("Id(设备名)"));
     ui.treeView->setModel(treeModel);
     ui.dateEdit->setCalendarPopup(true);
@@ -57,7 +66,7 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     ui.dateEdit_2->setDateTime(QDateTime::currentDateTime());
     ui.timeEdit_3->setTime(QTime::currentTime());
     ui.timeEdit_4->setTime(QTime::currentTime());
-    getThread->init(treeModel, checkResModel, h, sipMessage, ip, port, pushMethod, pushId);
+    getThread->init(treeModel, checkResModel, h, sipMessage, ip, port, pushMethod, pushId, fileModel);
     getThread->start();
     qRegisterMetaType<QList<QPersistentModelIndex>>("QList<QPersistentModelIndex>");
     qRegisterMetaType<QVector<int>>("QVector<int>");
@@ -87,6 +96,8 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(ui.pushButton_12, &QPushButton::clicked, this, &AWGBCheckTool::clearList);
     connect(ui.pushButton_36, &QPushButton::clicked, this, &AWGBCheckTool::reMain);
     connect(ui.pushButton_2, &QPushButton::clicked, this, &AWGBCheckTool::recordInfo);
+    connect(ui.pushButton_4, &QPushButton::clicked, this, &AWGBCheckTool::recordPlay);
+    connect(ui.pushButton_20, &QPushButton::clicked, this, &AWGBCheckTool::recordStop);
     connect(getThread, &GetAndParseThread::registerOk, this, &AWGBCheckTool::changeRegisterStatus);
     connect(getThread, &GetAndParseThread::unRegisterOk, this, &AWGBCheckTool::changeRegisterStatus);
 }
@@ -743,7 +754,6 @@ void AWGBCheckTool::playVideo()
         QString deId = ui.lineEdit->text();
         int ret;
         switch (ui.comboBox_3->currentIndex()) {
-        //      不同选项不同模式
         case 0:
             //            cout << "udp" << endl;
             makeDeviceInviteXml(sendBuf,  "UDP", deId);
@@ -903,8 +913,11 @@ void AWGBCheckTool::stopVideo(){
     tcpListener->channel->stop();
     tcpListener->stop();
     udpReceiver->stop();
-
-    video->clear();
+    if(!isRecordPlay)
+        video->clear();
+    else {
+        recordVideo->clear();
+    }
     qInfo() << "Video play stopped";
     ui.pushButton_24->setEnabled(true);
     ui.comboBox_3->setEnabled(true);
@@ -947,7 +960,11 @@ void AWGBCheckTool::UDPPlay()
         udpReceiver->channel->videotype = 0;
         qInfo() << "Start play in udp, h264";
     }
-    udpReceiver->channel->setEventHandle(video);
+    if(!isRecordPlay)
+        udpReceiver->channel->setEventHandle(video);
+    else {
+        udpReceiver->channel->setEventHandle(recordVideo);
+    }
     udpReceiver->setPort(atoi((char *)currGBInfo->mediaPort));
     udpReceiver->start();
     char * buf = (char*)calloc(1024, sizeof(char));
@@ -956,7 +973,11 @@ void AWGBCheckTool::UDPPlay()
     cout << buf <<endl;
     if(!ret)
         qInfo() << "Send Ack to backend, UDP mode";
-    video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
+    if(!isRecordPlay)
+        video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
+    else {
+        recordVideo->resize(ui.openGLWidget_2->width(), ui.openGLWidget_2->height());
+    }
     free(buf);
 }
 
@@ -972,14 +993,23 @@ void AWGBCheckTool::TCPPlay()
     tcpListener->connectType = 2;
     tcpListener->ip = *ip;
     tcpListener->port = atoi((char *)currGBInfo->mediaPort);
-    tcpListener->channel->setEventHandle(video);
+    if(!isRecordPlay)
+        tcpListener->channel->setEventHandle(video);
+    else {
+        tcpListener->channel->setEventHandle(recordVideo);
+    }
     tcpListener->start();
     char * buf = (char*)calloc(1024, sizeof(char));
     makeDevInfoAck(buf, ui.lineEdit->text());
     int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
     if(!ret)
         qInfo() << "Send Ack to backend, TCP mode";
-    video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
+    if(!isRecordPlay)
+        video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
+    else {
+        recordVideo->resize(ui.openGLWidget_2->width(), ui.openGLWidget_2->height());
+    }
+    free(buf);
 }
 
 
@@ -1004,7 +1034,7 @@ void AWGBCheckTool::TCPActivePlay()
     if(!ret)
         qInfo() << "Send Ack to backend, TCP Active mode";
     video->resize(ui.openGLWidget->width(), ui.openGLWidget->height());
-
+    free(buf);
 }
 
 void AWGBCheckTool::clearInfo(){
@@ -1045,6 +1075,12 @@ void AWGBCheckTool::reMain(){
 
 void AWGBCheckTool::recordInfo()
 {
+    fileModel->clear();
+    fileModel->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("视频编号")));
+    fileModel->setHorizontalHeaderItem(1, new QStandardItem(QObject::tr("通道ID")));
+    fileModel->setHorizontalHeaderItem(2, new QStandardItem(QObject::tr("录像开始时间")));
+    fileModel->setHorizontalHeaderItem(3, new QStandardItem(QObject::tr("录像结束时间")));
+    getThread->clearRecordFile();
     QDomDocument doc;
     QDomElement root = doc.createElement("Request");
     doc.appendChild(root);
@@ -1058,9 +1094,14 @@ void AWGBCheckTool::recordInfo()
     QDomText sipCmdText = doc.createTextNode("RecordInfo");
     sipCmd.appendChild(sipCmdText);
     root.appendChild(sipCmd);
-
+    if(ui.lineEdit->text().isEmpty())
+    {
+        QString a = "请选择一个设备/通道";
+        QMessageBox::information(this, "information", a);
+        return ;
+    }
     QDomElement deviceId = doc.createElement("DeviceId");
-    QDomText deviceIdText = doc.createTextNode(treeModel->takeItem(0)->text().split("(")[0]);
+    QDomText deviceIdText = doc.createTextNode(ui.lineEdit->text());
     deviceId.appendChild(deviceIdText);
     root.appendChild(deviceId);
 
@@ -1081,7 +1122,6 @@ void AWGBCheckTool::recordInfo()
     int ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().length());
     if(!ret)
         qInfo() << "Send RecordInfo to backend!";
-    cout << doc.toString().toStdString() << endl;
 }
 
 void AWGBCheckTool::changeRegisterStatus()
@@ -1093,4 +1133,75 @@ void AWGBCheckTool::changeRegisterStatus()
     else {
         ui.pushButton_8->setText("注册");
     }
+}
+
+void AWGBCheckTool::recordPlay()
+{
+    //给后端发invite，要包含录像文件名字
+    int curRow=ui.tableView_3->currentIndex().row();
+    QAbstractItemModel *modessl = ui.tableView_3->model();
+    QModelIndex indextemp = modessl->index(curRow, 1);
+    QVariant datatemp = modessl->data(indextemp);
+    QString deviceID = datatemp.toString();
+    if(deviceID.isEmpty())
+    {
+        QString a = "请选择一个录像文件";
+        QMessageBox::information(this, "information", a);
+        return ;
+    }
+
+    QDomDocument doc;
+    QDomElement root=doc.createElement("Request");
+    doc.appendChild(root);
+
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("SipCmd");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+
+    QDomElement deviceId = doc.createElement("DeviceId");
+    QDomText deviceIdText = doc.createTextNode(deviceID);
+    deviceId.appendChild(deviceIdText);
+    root.appendChild(deviceId);
+
+    QDomElement devicePort = doc.createElement("SipCmd");
+    QDomText devicePortText = doc.createTextNode("Invite");//标识是录像的invite
+    devicePort.appendChild(devicePortText);
+    root.appendChild(devicePort);
+
+    QDomElement playMet = doc.createElement("Method");
+    QDomText playMetText = doc.createTextNode(ui.comboBox_2->currentText());
+    playMet.appendChild(playMetText);
+    root.appendChild(playMet);
+    //跟filepath应该无关，主要是用时间戳？？
+//    QDomElement filePathXml = doc.createElement("filePath");
+//    QDomText filePathXmlText = doc.createTextNode(filePath.replace('_', ' '));
+//    filePathXml.appendChild(filePathXmlText);
+//    root.appendChild(filePathXml);
+    indextemp = modessl->index(curRow, 2);
+    datatemp = modessl->data(indextemp);
+    QDomElement startTime = doc.createElement("StartTime");
+    QDomText startTimeText = doc.createTextNode(datatemp.toString());
+    startTime.appendChild(startTimeText);
+    root.appendChild(startTime);
+
+    indextemp = modessl->index(curRow, 3);
+    datatemp = modessl->data(indextemp);
+    QDomElement endTime = doc.createElement("EndTime");
+    QDomText endTimeText = doc.createTextNode(datatemp.toString());
+    endTime.appendChild(endTimeText);
+    root.appendChild(endTime);
+
+    int ret;
+    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().size());
+    getThread->setMethod(ui.comboBox_2->currentText());
+    if(!ret)
+        qInfo() << "send record play invite to backend";
+    isRecordPlay = true;
+}
+
+void AWGBCheckTool::recordStop()
+{
+    stopVideo();
+    isRecordPlay = false;
 }

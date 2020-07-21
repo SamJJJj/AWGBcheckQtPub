@@ -308,17 +308,17 @@
              </property>
              <item>
               <property name="text">
-               <string>udp</string>
+               <string>UDP</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>tcp主动</string>
+               <string>TCP</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>tcp被动</string>
+               <string>TCPActive</string>
               </property>
              </item>
             </widget>
@@ -472,10 +472,18 @@
                </widget>
               </item>
               <item>
-               <widget class="QDateEdit" name="dateEdit"/>
+               <widget class="QDateEdit" name="dateEdit">
+                <property name="displayFormat">
+                 <string>yyyy/MM/dd</string>
+                </property>
+               </widget>
               </item>
               <item>
-               <widget class="QTimeEdit" name="timeEdit_3"/>
+               <widget class="QTimeEdit" name="timeEdit_3">
+                <property name="displayFormat">
+                 <string>HH:mm</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -503,12 +511,16 @@
                </widget>
               </item>
               <item>
-               <widget class="QDateEdit" name="dateEdit_2"/>
+               <widget class="QDateEdit" name="dateEdit_2">
+                <property name="displayFormat">
+                 <string>yyyy/MM/dd</string>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QTimeEdit" name="timeEdit_4">
                 <property name="displayFormat">
-                 <string>H:mm</string>
+                 <string>HH:mm</string>
                 </property>
                </widget>
               </item>

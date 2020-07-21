@@ -1,3 +1,4 @@
+#pragma execution_character_set(“utf-8”)
 #include "AWGBCheckTool.h"
 #include "AWQueue.h"
 #include <iostream>
@@ -5,8 +6,32 @@
 #include <QtXml/QDomComment>
 #include <QtXml/QDomElement>
 #include <QtXml/QDomNodeList>
+#include <QTextCodec>
+extern "C"{
+#include <iconv.h>
+}
 
 using namespace std;
+
+static int code_convert(char *from_charset, char *to_charset, unsigned char *inbuf, unsigned int inlen, unsigned char *outbuf, unsigned int *outlen)
+{
+ iconv_t cd;
+ unsigned char **pin = &inbuf;
+ unsigned char **pout = &outbuf;
+ cd = iconv_open(to_charset, from_charset);
+ if (cd == 0)
+  return -1;
+
+ memset(outbuf, 0, *outlen);
+
+ if (iconv(cd, (char **)pin, &inlen, (char **)pout, outlen) == -1)
+  return -1;
+
+ iconv_close(cd);
+
+ return 0;
+}
+
 GetAndParseThread::GetAndParseThread(QObject *)
 {
 
@@ -22,27 +47,32 @@ void GetAndParseThread::setMethod(const QString & m)
     method = m;
 }
 
-void GetAndParseThread::init(QStandardItemModel* tree, QStandardItemModel *table, int h, QString* sipMessage, QString* i, QString* p, QString *pm, QString *id)
+void GetAndParseThread::init(QStandardItemModel* tree, QStandardItemModel *table, int h, QString* sipMessage, QString* i, QString* p, QString *pm, QString *id,QStandardItemModel* file)
 {
     treeModel = tree;
     checkResModel = table;
     handle = h;
     tableId = 0;
+    fileId = 0;
     sipMessages = sipMessage;
     ip = i;
     port = p;
     pushMethod = pm;
     pushId = id;
+    recordFileModel = file;
 }
 
 
 
 void GetAndParseThread::run()
 {
-    unsigned char buf[2048] = {0};
+    unsigned char getBuf[2048] = {0};
+    unsigned char utfBuf[2048] = {0};
+    unsigned int utfLen = 2048;
     int ret = -1;
     unsigned int len = INT_MAX;
     QString str;
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QTextStream streamJudge(&str);
     while(1)
     {
@@ -51,10 +81,11 @@ void GetAndParseThread::run()
         ret = AW_BSQueue_GetBuffer(handle, NULL, &len);
         if(!ret)
         {
-            //解析发来的数据，放进结构体，setModel, 发信号
-            ret = AW_BSQueue_GetBuffer(handle, buf, &len);
+            //解析发来的数据，放进结构体, 发信号
+            ret = AW_BSQueue_GetBuffer(handle, getBuf, &len);
+            code_convert("gb2312", "utf-8", getBuf, len, utfBuf, &utfLen);
             QDomDocument doc;
-            doc.setContent(QString((char*)buf));
+            doc.setContent(QString((char*)utfBuf));
             QDomNodeList list = doc.elementsByTagName("CmdType");
             if(list.at(0).toElement().childNodes().at(0).toText().save(streamJudge, 0), str == QString("SipShowBuffer"))
             {
@@ -63,6 +94,10 @@ void GetAndParseThread::run()
                 list = doc.elementsByTagName("Buffer");
                 list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
                 *sipMessages = text;
+                sipMessages->replace("&lt;", "<");
+                sipMessages->replace("&#xd;", "");
+                *sipMessages = sipMessages->toLocal8Bit();
+//                *sipMessages = codec->toUnicode(sipMessages->toLocal8Bit());//转成utf-8
                 text.clear();
                 str.clear();
                 list = doc.elementsByTagName("DeviceId");
@@ -132,7 +167,7 @@ void GetAndParseThread::run()
                 QString item = strID;
 //                QString item = strID+"("+strName+")";
 
-                QStandardItem* itemC = new QStandardItem((item));
+                QStandardItem* itemC = new QStandardItem((item.toLocal8Bit().data()));
 //                treeModel->appendRow(itemProject);
                 strID.clear();
                 strName.clear();
@@ -146,8 +181,9 @@ void GetAndParseThread::run()
                     QDomNodeList list10 = deviceCh.elementsByTagName("ID");
                     list10.at(0).toElement().childNodes().at(0).toText().save(streamID, 0);
                     list9.at(0).toElement().childNodes().at(0).toText().save(streamName, 0);
+                    strName = list9.at(0).toElement().childNodes().at(0).toText().data();
                     item = strID+"("+strName+")";
-                    QStandardItem* itemProject = new QStandardItem((item));
+                    QStandardItem* itemProject = new QStandardItem(QString(item.toLocal8Bit()));
                     itemC->appendRow(itemProject);
                     strID.clear();
                     strName.clear();
@@ -231,7 +267,7 @@ void GetAndParseThread::run()
                 else if(method == QString("TCP"))
                 {
                     emit TCP();
-                    cout << "TCP play" << endl;
+
                 }
                 else
                     emit TCPActive();
@@ -242,7 +278,24 @@ void GetAndParseThread::run()
                 QString text;
                 QTextStream streamText(&text);
                 list = doc.elementsByTagName("FilePath");
-                //filePath到底有几个？？，最好按一个组装
+                QDomNodeList list1 = doc.elementsByTagName("StartTime");
+                QDomNodeList list2 = doc.elementsByTagName("EndTime");
+                QDomNodeList list3 = doc.elementsByTagName("DeviceID");
+                list.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                recordFileModel->setItem(fileId, 0, new QStandardItem(text));
+                text.clear();
+                list3.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                recordFileModel->setItem(fileId, 1, new QStandardItem(text));
+                text.clear();
+                list1.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                recordFileModel->setItem(fileId, 2, new QStandardItem(text));
+                text.clear();
+                list2.at(0).toElement().childNodes().at(0).toText().save(streamText, 0);
+                recordFileModel->setItem(fileId, 3, new QStandardItem(text));
+                ++fileId;
+
+                text.clear();
+                str.clear();
             }
             else if(str == "RegisterOK")
             {
@@ -252,10 +305,11 @@ void GetAndParseThread::run()
             {
                 emit unRegisterOk();
             }
-            cout << "AW_BSQueue_GetBuffer"<< endl;
-            cout << len << endl;
-            memset(buf, 0, 2048);
+
+            memset(getBuf, 0, 2048);
+            memset(utfBuf, 0, 2048);
             len = INT_MAX;
+            utfLen = 2048;
         }
     }
 }
@@ -263,4 +317,9 @@ void GetAndParseThread::run()
 void GetAndParseThread::clearList()
 {
     tableId = 0;
+}
+
+void GetAndParseThread::clearRecordFile()
+{
+    fileId = 0;
 }

@@ -20,9 +20,10 @@ class GetAndParseThread : public QThread
 public:
     explicit GetAndParseThread(QObject * parent = 0);
     ~GetAndParseThread();
-    void init(QStandardItemModel*, QStandardItemModel*, int, QString *, QString *, QString *, QString *, QString *);
+    void init(QStandardItemModel*, QStandardItemModel*, int, QString *, QString *, QString *, QString *, QString *, QStandardItemModel*);
     void setMethod(const QString & );
     void clearList();
+    void clearRecordFile();
     QString bvkek;
     QString keyVersion;
     QString bPubKey;
@@ -42,6 +43,7 @@ signals:
 private:
     int handle;
     int tableId;
+    int fileId;
     QString method;
     QString *ip;
     QString *port;
@@ -50,6 +52,7 @@ private:
     QStandardItemModel *checkResModel;
     QStandardItemModel *treeModel;
     QString *sipMessages;
+    QStandardItemModel *recordFileModel;
 };
 
 //class ShowTree: public QThread
@@ -121,7 +124,9 @@ private:
     TcpListener *tcpListener;
     QStandardItemModel *treeModel;
     ShowVideo* video;
+    ShowVideo* recordVideo;
     QStandardItemModel *checkResModel;
+    QStandardItemModel *fileModel;
     QString *sipMessage;
     pGBStart_s currGBInfo;
     QString *ip;
@@ -129,6 +134,7 @@ private:
     QString *pushMethod;
     QString *pushId;
     QProcess *pro;
+    bool isRecordPlay;
     int seq;
     int handle;
     void SetList(pGBStart_s);
@@ -161,4 +167,6 @@ private slots:
     void reMain();
     void recordInfo();
     void changeRegisterStatus();
+    void recordPlay();
+    void recordStop();
 };
