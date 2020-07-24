@@ -964,7 +964,7 @@
         <item>
          <widget class="QStackedWidget" name="stackedWidget_2">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="page_3">
            <layout class="QGridLayout" name="gridLayout_6">
@@ -1008,7 +1008,7 @@
                 <item>
                  <widget class="QPushButton" name="pushButton_14">
                   <property name="text">
-                   <string>控制1</string>
+                   <string>目录查询</string>
                   </property>
                  </widget>
                 </item>
@@ -1028,7 +1028,7 @@
                 <item>
                  <widget class="QPushButton" name="pushButton_15">
                   <property name="text">
-                   <string>控制2</string>
+                   <string>订阅</string>
                   </property>
                  </widget>
                 </item>
@@ -1048,7 +1048,7 @@
                 <item>
                  <widget class="QPushButton" name="pushButton_16">
                   <property name="text">
-                   <string>控制3</string>
+                   <string>取消订阅</string>
                   </property>
                  </widget>
                 </item>

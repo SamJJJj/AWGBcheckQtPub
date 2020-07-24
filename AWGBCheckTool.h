@@ -40,6 +40,7 @@ signals:
     void svacKey();
     void registerOk();
     void unRegisterOk();
+    void stopPush();
 private:
     int handle;
     int tableId;
@@ -139,6 +140,7 @@ private:
     int handle;
     void SetList(pGBStart_s);
     void EndList();
+    void stopPush();
 private slots:
     void dataChangedSlot();
     void ButtonCli(pGBStart_s);
@@ -169,4 +171,6 @@ private slots:
     void changeRegisterStatus();
     void recordPlay();
     void recordStop();
+    void subscribe();
+    void unSubscribe();
 };

@@ -66,9 +66,9 @@ void GetAndParseThread::init(QStandardItemModel* tree, QStandardItemModel *table
 
 void GetAndParseThread::run()
 {
-    unsigned char getBuf[2048] = {0};
-    unsigned char utfBuf[2048] = {0};
-    unsigned int utfLen = 2048;
+    unsigned char getBuf[2048*4] = {0};
+    unsigned char utfBuf[2048*4] = {0};
+    unsigned int utfLen = 2048*4;
     int ret = -1;
     unsigned int len = INT_MAX;
     QString str;
@@ -301,9 +301,13 @@ void GetAndParseThread::run()
             {
                 emit registerOk();
             }
-            else if(str == "unRegisterOK")
+            else if(str == "UnRegisterOK")
             {
                 emit unRegisterOk();
+            }
+            else if(str == "StopPush")
+            {
+                emit stopPush();
             }
 
             memset(getBuf, 0, 2048);

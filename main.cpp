@@ -95,10 +95,10 @@ int main(int argc, char *argv[])
     QProcess* proBase = new QProcess();
     int handle;
     proMS->start("MediaServer.exe");
-//    proBeanstalk->start("beanstalkd.exe -l 127.0.0.1 -p 11300");
-//    proBase->start("AWGBBase.exe");
-//    ret = AW_BSQueue_Init(&handle, (unsigned char *)"127.0.0.1", 0, (unsigned char *)"Server",(unsigned char *)"Client");
-    ret = AW_BSQueue_Init(&handle, (unsigned char *)"192.168.0.97", 0, (unsigned char *)"Server",(unsigned char *)"Client");
+    proBeanstalk->start("beanstalkd.exe -l 127.0.0.1 -p 11300");
+    proBase->start("AWGBBase.exe");
+    ret = AW_BSQueue_Init(&handle, (unsigned char *)"127.0.0.1", 0, (unsigned char *)"Server",(unsigned char *)"Client");
+//    ret = AW_BSQueue_Init(&handle, (unsigned char *)"192.168.0.97", 0, (unsigned char *)"Server",(unsigned char *)"Client");
     if(ret == 0)
         qInfo() << "AWQueue init OK";
     else {

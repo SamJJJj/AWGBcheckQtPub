@@ -28,8 +28,11 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     AWGBCheckTool::SetList(param);
     currGBInfo = (pGBStart_s)calloc(1, sizeof(GBStart_s));
     memcpy(currGBInfo, param, sizeof(GBStart_s));
-    if(currGBInfo->modeType <= 3)
+    if(currGBInfo->modeType <= 3 || currGBInfo->modeType == 6)
+    {
         ui.pushButton_8->setEnabled(false);
+        ui.stackedWidget_2->setCurrentIndex(0);
+    }
     handle = h;
     sipMessage = new QString;
     getThread = new GetAndParseThread;
@@ -74,6 +77,7 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(ui.tableView_2->model(), &QStandardItemModel::dataChanged, this, &AWGBCheckTool::dataChangedSlot);
     connect(ui.pushButton_8, &QPushButton::clicked, this, &AWGBCheckTool::deviceRegister);
     connect(ui.pushButton_6, &QPushButton::clicked, this, &AWGBCheckTool::deviceCatalog);
+    connect(ui.pushButton_14, &QPushButton::clicked, this, &AWGBCheckTool::deviceCatalog);
     connect(ui.pushButton_23, &QPushButton::clicked, this, &AWGBCheckTool::toControlPage);
     connect(ui.pushButton_13, &QPushButton::clicked, this, &AWGBCheckTool::toListPage);
     connect(ui.pushButton, &QPushButton::clicked, this, &AWGBCheckTool::toVideoPage);
@@ -100,6 +104,9 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(ui.pushButton_20, &QPushButton::clicked, this, &AWGBCheckTool::recordStop);
     connect(getThread, &GetAndParseThread::registerOk, this, &AWGBCheckTool::changeRegisterStatus);
     connect(getThread, &GetAndParseThread::unRegisterOk, this, &AWGBCheckTool::changeRegisterStatus);
+    connect(ui.pushButton_15, &QPushButton::clicked, this, &AWGBCheckTool::subscribe);
+    connect(ui.pushButton_16, &QPushButton::clicked, this, &AWGBCheckTool::unSubscribe);
+    connect(getThread, &GetAndParseThread::stopPush, this, &AWGBCheckTool::stopPush);
 }
 
 AWGBCheckTool::~AWGBCheckTool()
@@ -921,7 +928,12 @@ void AWGBCheckTool::stopVideo(){
     qInfo() << "Video play stopped";
     ui.pushButton_24->setEnabled(true);
     ui.comboBox_3->setEnabled(true);
-    char sendBuf[2048] = {0};
+    if(currGBInfo->modeType == 2)
+        stopPush();
+}
+
+void AWGBCheckTool::stopPush()
+{
     QString deId = ui.lineEdit->text();
     QString urlS = "http://127.0.0.1/index/api/close_pushGB28181Rtp?schema=rtp&vhost=__defaultVhost__&app=rtp&stream=1&PushUrl=rtp://"+*ip+":" + *port;
     QNetworkAccessManager *manager = new QNetworkAccessManager();
@@ -1204,4 +1216,61 @@ void AWGBCheckTool::recordStop()
 {
     stopVideo();
     isRecordPlay = false;
+}
+
+void AWGBCheckTool::subscribe()
+{
+    QDomDocument doc;
+    QDomElement root=doc.createElement("Request");
+    doc.appendChild(root);
+
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("SipCmd");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+
+    QDomElement sipCmd = doc.createElement("SipCmd");
+    QDomText sipCmdText = doc.createTextNode("Subscribe");
+    sipCmd.appendChild(sipCmdText);
+    root.appendChild(sipCmd);
+
+    QDomElement deviceId = doc.createElement("DeviceId");
+    QDomText deviceIdText = doc.createTextNode(ui.treeView->currentIndex().parent().data().toString());
+    deviceId.appendChild(deviceIdText);
+    root.appendChild(deviceId);
+
+    int ret;
+    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().size());
+    if(!ret)
+        qInfo() << "send subscribe to backend";
+    cout << doc.toString().toStdString() << endl;
+}
+
+
+void AWGBCheckTool::unSubscribe()
+{
+    QDomDocument doc;
+    QDomElement root=doc.createElement("Request");
+    doc.appendChild(root);
+
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("SipCmd");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+
+    QDomElement sipCmd = doc.createElement("SipCmd");
+    QDomText sipCmdText = doc.createTextNode("UnSubscribe");
+    sipCmd.appendChild(sipCmdText);
+    root.appendChild(sipCmd);
+
+    QDomElement deviceId = doc.createElement("DeviceId");
+    QDomText deviceIdText = doc.createTextNode(ui.treeView->currentIndex().parent().data().toString());
+    deviceId.appendChild(deviceIdText);
+    root.appendChild(deviceId);
+
+    int ret;
+    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().size());
+    if(!ret)
+        qInfo() << "send unSubscribe to backend";
+    cout << doc.toString().toStdString() << endl;
 }
