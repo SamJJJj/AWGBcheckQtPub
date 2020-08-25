@@ -63,7 +63,7 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <layout class="QHBoxLayout" name="HorizontalLayout1" stretch="0,0,0,0,0,0,0,0,0,0,0,0">
+         <layout class="QHBoxLayout" name="HorizontalLayout1" stretch="0,0,0,0,0,0,0,0,0,0,0">
           <property name="spacing">
            <number>7</number>
           </property>
@@ -159,6 +159,11 @@
             </item>
             <item>
              <property name="text">
+              <string>下级平台(作为NVR)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>上级平台</string>
              </property>
             </item>
@@ -204,6 +209,16 @@
            </spacer>
           </item>
           <item>
+           <widget class="QComboBox" name="boBox_1"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="exButton">
+            <property name="text">
+             <string>导出配置</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="HorizontalSpacer_2">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -215,23 +230,6 @@
              </size>
             </property>
            </spacer>
-          </item>
-          <item>
-           <widget class="QComboBox" name="boBox_1"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="exButton">
-            <property name="text">
-             <string>导出配置</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="inButton">
-            <property name="text">
-             <string>导入配置</string>
-            </property>
-           </widget>
           </item>
           <item>
            <spacer name="HorizontalSpacer_3">

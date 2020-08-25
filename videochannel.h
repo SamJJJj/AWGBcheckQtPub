@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <list>
 #include <QString>
+#include <QFile>
 
 #include "mutex.h"
 #include "DataListThread.h"
@@ -64,6 +65,9 @@ public:
 
     void setCallId(int callId){mCallId = callId;}
     void setDId(int did) { this->did = did; }
+    void setFileName(QString file) {fileName = file;}
+    void setRecordDownload(){recordDownloadFlag = true;}
+    void closeFile(){if(recordDownloadFlag) file.close();}
     int getCallId(){return (this!=NULL)?mCallId:-1;}
     int64_t getTimeStamp_MilliSecond();
 
@@ -176,6 +180,9 @@ private:
     char* m_cert_file_self;
     char* m_crypt_key_version;
     char* m_crypt_key_for_video;
+    QString fileName;
+    bool recordDownloadFlag;
+    QFile file;
     ///用于输出到界面上的回调函数
 private:
     VideoChannelEventHandle *mVideoChannelEventHandle; //回调函数 用于传递信息给界面

@@ -171,6 +171,7 @@ VideoChannel::VideoChannel()
 
     in_buff = (char*)malloc(2 * 1024 * 1024);
     out_buff = (char*)malloc(2 * 1024 * 1024);
+    recordDownloadFlag = false;
     handle = SvacDecCreate();
 
 }
@@ -188,7 +189,10 @@ VideoChannel::~VideoChannel()
 void VideoChannel::threadStart()
 {
     mH264buf = (char *)malloc(H264_FRAME_SIZE_MAX);
-
+    if(recordDownloadFlag)
+    {
+        file.setFileName(fileName);
+    }
     mIsLastKeyFrameLostPacket = false; //上一个I帧是否丢包了，是的话，接下来的帧都有可能花屏 接下来所有的帧， 都不传入检测
     mIsKeyFrameGetted = false; //用来记录I帧是否获取到了 否则丢弃得到的h264帧
 
@@ -623,6 +627,14 @@ void VideoChannel::decodeH264Buffer(uint8_t *buffer, int size, bool isLostPacket
 {
     packet.data = buffer;
     packet.size = size;
+    //在这里下载, buffer是得到的H264格式的视频。
+    if(recordDownloadFlag)
+    {
+        file.open(QIODevice::WriteOnly | QIODevice::Append);
+        file.write((const char *)buffer, size);
+        file.close();
+        return ;
+    }
 //    AVRational raw_time_rate = av_inv_q(pCodecCtx->framerate);
 //    av_packet_rescale_ts(&packet, AVRational(),raw_time_rate);
 

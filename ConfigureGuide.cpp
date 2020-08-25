@@ -68,6 +68,8 @@ void ConfigureGuide::inConf(){
         if (data.trimmed() == '2'){ui.modelType->setCurrentIndex(2);}
         if (data.trimmed() == '3'){ui.modelType->setCurrentIndex(3);}
         if (data.trimmed() == '4'){ui.modelType->setCurrentIndex(4);}
+        if (data.trimmed() == '5'){ui.modelType->setCurrentIndex(5);}
+        if (data.trimmed() == '6'){ui.modelType->setCurrentIndex(6);}
     }
     data = file.readLine().data();
     ui.localId->setText(data.trimmed());

@@ -282,6 +282,8 @@ void RtpReciever::run()
 //    std::cout << "------------- destroyed 1 ----------" << std::endl;
     sess.BYEDestroy(RTPTime(Timeout.tv_sec, Timeout.tv_usec), 0, 0);
 //    std::cout << "------------- destroyed ----------" << std::endl;
+    //推流结束应该在这里，表示下载完成！！
+//    emit downLoadOK();
     qInfo() << "Rtp session destroyed";
 #ifdef WIN32
     WSACleanup();

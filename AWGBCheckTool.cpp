@@ -17,6 +17,10 @@
 #include <QNetworkAccessManager>
 #include <QMetaType>
 #include <QCoreApplication>
+#include <QInputDialog>
+
+#include <iostream>
+
 using namespace std;
 
 
@@ -28,11 +32,17 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     AWGBCheckTool::SetList(param);
     currGBInfo = (pGBStart_s)calloc(1, sizeof(GBStart_s));
     memcpy(currGBInfo, param, sizeof(GBStart_s));
-    if(currGBInfo->modeType <= 3 || currGBInfo->modeType == 6)
+    if(currGBInfo->modeType < 3)
     {
         ui.pushButton_8->setEnabled(false);
         ui.stackedWidget_2->setCurrentIndex(0);
     }
+
+    if(currGBInfo->modeType != 6)   //只有测试目标是上级平台，才能发送notify
+    {
+        ui.pushButton_17->setEnabled(false);
+    }
+
     handle = h;
     sipMessage = new QString;
     getThread = new GetAndParseThread;
@@ -48,6 +58,7 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     video = new ShowVideo(ui.openGLWidget);
     recordVideo = new ShowVideo(ui.openGLWidget_2);
     isRecordPlay = false;
+    isRecordDownload = false;
     fileModel->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("视频编号")));
     fileModel->setHorizontalHeaderItem(1, new QStandardItem(QObject::tr("通道ID")));
     fileModel->setHorizontalHeaderItem(2, new QStandardItem(QObject::tr("录像开始时间")));
@@ -107,6 +118,17 @@ AWGBCheckTool::AWGBCheckTool(QWidget *parent, pGBStart_s param, int h)
     connect(ui.pushButton_15, &QPushButton::clicked, this, &AWGBCheckTool::subscribe);
     connect(ui.pushButton_16, &QPushButton::clicked, this, &AWGBCheckTool::unSubscribe);
     connect(getThread, &GetAndParseThread::stopPush, this, &AWGBCheckTool::stopPush);
+    connect(ui.pushButton_32, &QPushButton::clicked, this, &AWGBCheckTool::ptzCtl);
+    connect(ui.pushButton_33, &QPushButton::clicked, this, &AWGBCheckTool::ptzCtl);
+    connect(ui.pushButton_34, &QPushButton::clicked, this, &AWGBCheckTool::ptzCtl);
+    connect(ui.pushButton_35, &QPushButton::clicked, this, &AWGBCheckTool::ptzCtl);
+    connect(ui.pushButton_26, &QPushButton::clicked, this, &AWGBCheckTool::ptzCtl);
+    connect(ui.pushButton_27, &QPushButton::clicked, this, &AWGBCheckTool::ptzCtl);
+    connect(ui.pushButton_28, &QPushButton::clicked, this, &AWGBCheckTool::ptzCtl);
+    connect(ui.pushButton_29, &QPushButton::clicked, this, &AWGBCheckTool::ptzCtl);
+    connect(ui.pushButton_17, &QPushButton::clicked, this, &AWGBCheckTool::notify);
+    connect(ui.pushButton_18, &QPushButton::clicked, this, &AWGBCheckTool::unNotify);
+    connect(ui.pushButton_22, &QPushButton::clicked, this, &AWGBCheckTool::recordDownload);
 }
 
 AWGBCheckTool::~AWGBCheckTool()
@@ -131,9 +153,10 @@ inline QString chooseModeType(int i)
     case 0: return "IPC";
     case 1: return "NVR/DVR";
     case 2: return "解码器";
-    case 3: return "下级平台（作为上级）";
-    case 4: return "下级平台（作为IPC）";
-    case 5: return "上级平台";
+    case 3: return "下级平台(作为上级)";
+    case 4: return "下级平台(作为IPC)";
+    case 5: return "下级平台(作为NVR)";
+    case 6: return "上级平台";
     }
 }
 
@@ -145,12 +168,14 @@ inline int mode2Int(QString s)
         return 1;
     if(s == "解码器")
         return 2;
-    if(s == "下级平台（作为上级）")
+    if(s == "下级平台(作为上级)")
         return 3;
-    if(s == "下级平台（作为IPC）")
+    if(s == "下级平台(作为IPC)")
         return 4;
-    if(s == "上级平台")
+    if(s == "下级平台(作为NVR)")
         return 5;
+    if(s == "上级平台")
+        return 6;
     else
         return -1;
 }
@@ -179,12 +204,12 @@ inline QString chooseAuthMode(int i)
 void AWGBCheckTool::SetList(pGBStart_s param)
 {
     QStandardItemModel *student_model = new QStandardItemModel();
-    student_model->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("设备类型")));
+    student_model->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("待注册设备类型")));
     student_model->setHorizontalHeaderItem(1, new QStandardItem(QObject::tr("认证方式")));
-    student_model->setHorizontalHeaderItem(2, new QStandardItem(QObject::tr("设备ID")));
-    student_model->setHorizontalHeaderItem(3, new QStandardItem(QObject::tr("设备IP")));
-    student_model->setHorizontalHeaderItem(4, new QStandardItem(QObject::tr("设备端口")));
-    student_model->setHorizontalHeaderItem(5, new QStandardItem(QObject::tr("设备域")));
+    student_model->setHorizontalHeaderItem(2, new QStandardItem(QObject::tr("待注册设备ID")));
+    student_model->setHorizontalHeaderItem(3, new QStandardItem(QObject::tr("待注册设备IP")));
+    student_model->setHorizontalHeaderItem(4, new QStandardItem(QObject::tr("待注册设备端口")));
+    student_model->setHorizontalHeaderItem(5, new QStandardItem(QObject::tr("待注册设备域")));
     student_model->setHorizontalHeaderItem(6, new QStandardItem(QObject::tr("有效期")));
     student_model->setHorizontalHeaderItem(7, new QStandardItem(QObject::tr("心跳间隔")));
     student_model->setHorizontalHeaderItem(8, new QStandardItem(QObject::tr("心跳次数")));
@@ -200,24 +225,51 @@ void AWGBCheckTool::SetList(pGBStart_s param)
         student_model->setHorizontalHeaderItem(10, new QStandardItem(QObject::tr("密码")));
     }
     //利用setModel()方法将数据模型与QTableView绑定;
-    for(int i = 0; i < 5; ++i)
+    for(int i = 0; i < 1; ++i)
     {
-        student_model->setItem(i, 0, new QStandardItem(chooseModeType(i)));
-        student_model->setItem(i, 2, new QStandardItem(QString("34020000002000000001")));
-        student_model->setItem(i, 3, new QStandardItem(QString("192.168.0.108")));
-        student_model->setItem(i, 4, new QStandardItem(QString("5060")));
-        student_model->setItem(i, 5, new QStandardItem(QString("3402000000")));
-        student_model->setItem(i, 6, new QStandardItem(QString("60")));
-        student_model->setItem(i, 7, new QStandardItem(QString("10")));
-        student_model->setItem(i, 8, new QStandardItem(QString("6")));
-        student_model->setItem(i, 9, new QStandardItem(QString("10002")));
-        if (param->protoType == 0){
-            student_model->setItem(i, 1, new QStandardItem(chooseAuthMode(0)));
-            student_model->setItem(i, 10, new QStandardItem(QString("path")));
-        }else{
-            student_model->setItem(i, 10, new QStandardItem(QString("passwd")));
+        QString fileName;
+        if(param->protoType)
+        {
+            fileName = "28181RegConf.txt";
         }
+        else {
+            fileName = "35114RegConf.txt";
+        }
+        QFile file(fileName);
+        if(!file.exists())
+        {
+            student_model->setItem(i, 0, new QStandardItem(chooseModeType(i)));
+            student_model->setItem(i, 2, new QStandardItem(QString("34020000002000000001")));
+            student_model->setItem(i, 3, new QStandardItem(QString("192.168.0.108")));
+            student_model->setItem(i, 4, new QStandardItem(QString("5060")));
+            student_model->setItem(i, 5, new QStandardItem(QString("3402000000")));
+            student_model->setItem(i, 6, new QStandardItem(QString("60")));
+            student_model->setItem(i, 7, new QStandardItem(QString("10")));
+            student_model->setItem(i, 8, new QStandardItem(QString("6")));
+            student_model->setItem(i, 9, new QStandardItem(QString("10002")));
+            if (param->protoType == 0){
+                student_model->setItem(i, 1, new QStandardItem(chooseAuthMode(0)));
+                student_model->setItem(i, 10, new QStandardItem(QString("path")));
+            }else{
+                student_model->setItem(i, 10, new QStandardItem(QString("passwd")));
+            }
+        }
+        else {
+            file.open(QIODevice::ReadOnly | QIODevice::Text);
+            student_model->setItem(i, 0, new QStandardItem(chooseModeType(QString(file.readLine().data()).trimmed().toInt())));
+            if (param->protoType == 0){
+                student_model->setItem(i, 1, new QStandardItem(chooseAuthMode(QString(file.readLine().data()).trimmed().toInt())));
+            }
+            for(int j = 2; j < 10; ++j)
+            {
+                student_model->setItem(i, j, new QStandardItem(QString(file.readLine().data()).trimmed()));
+
+            }
+            student_model->setItem(i, 10, new QStandardItem(QString(file.readLine().data()).trimmed()));
+        }
+        file.close();
     }
+
     //    ui.tableView_2->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui.tableView_2->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui.tableView_2->setModel(student_model);
@@ -422,7 +474,7 @@ void AWGBCheckTool::dataChangedSlot()
         }
         break;
     case 9 :
-        if (param->protoType == 0){
+        if (currGBInfo->protoType == 0){
             QString a = "不允许在此处修改";
             QMessageBox::information(this, "information", a);
             modessl->setData(indextemp,QString("path"));
@@ -478,15 +530,34 @@ void AWGBCheckTool::deviceRegister()
     ui.label_3->setText("注册");
     if(ui.pushButton_8->text() == "注册")
     {
+        QString fileName;
+        if(currGBInfo->protoType)
+        {
+            fileName = "28181RegConf.txt";
+        }else {
+            fileName = "35114RegConf.txt";
+        }
+        QFile file(fileName);
+        QString writeData;
+        file.open(QIODevice::WriteOnly | QIODevice::Text);
         pGBStart_s content = (pGBStart_s)calloc(1, sizeof(pGBStart_S));
         QAbstractItemModel *modessl = ui.tableView_2->model();
         QModelIndex indextemp = modessl->index(curRow, 0);
         QVariant datatemp = modessl->data(indextemp);
         content->modeType = mode2Int(datatemp.toString());
+        writeData = QString(mode2Int(datatemp.toString()) + '0') + "\n";
+        file.write(writeData.toLatin1());
+        writeData.clear();
 
         indextemp = modessl->index(curRow, 1);
         datatemp = modessl->data(indextemp);
         content->authMethod = proto2Int(datatemp.toString());
+        if(!currGBInfo->protoType)
+        {
+            writeData = QString(content->authMethod) + "\n";
+            file.write(writeData.toLatin1());
+            writeData.clear();
+        }
         indextemp = modessl->index(curRow, 2);
         datatemp = modessl->data(indextemp);
         if(datatemp.toString().length() != 0)
@@ -494,40 +565,65 @@ void AWGBCheckTool::deviceRegister()
             strcpy(content->localId, datatemp.toString().toLatin1().data());
             content->localIdLen = datatemp.toString().length();
         }
+        writeData = datatemp.toString() + "\n";
+        file.write(writeData.toLatin1());
+        writeData.clear();
+
         indextemp = modessl->index(curRow, 3);
         datatemp = modessl->data(indextemp);
         strcpy(content->localIp, datatemp.toString().toLatin1().data());
         content->localIpLen = datatemp.toString().length();
+        writeData = datatemp.toString() + "\n";
+        file.write(writeData.toLatin1());
+        writeData.clear();
 
         indextemp = modessl->index(curRow, 4);
         datatemp = modessl->data(indextemp);
         strcpy(content->localPort, datatemp.toString().toLatin1().data());
         content->localPortLen = datatemp.toString().length();
+        writeData = datatemp.toString() + "\n";
+        file.write(writeData.toLatin1());
+        writeData.clear();
 
         indextemp = modessl->index(curRow, 5);
         datatemp = modessl->data(indextemp);
         strcpy(content->localArea, datatemp.toString().toLatin1().data());
         content->localAreaLen = datatemp.toString().length();
+        writeData = datatemp.toString() + "\n";
+        file.write(writeData.toLatin1());
+        writeData.clear();
 
         indextemp = modessl->index(curRow, 6);
         datatemp = modessl->data(indextemp);
         strcpy(content->validTime, datatemp.toString().toLatin1().data());
         content->validTimeLen = datatemp.toString().length();
+        writeData = datatemp.toString() + "\n";
+        file.write(writeData.toLatin1());
+        writeData.clear();
 
         indextemp = modessl->index(curRow, 7);
         datatemp = modessl->data(indextemp);
         strcpy(content->beatTime, datatemp.toString().toLatin1().data());
         content->beatTimeLen = datatemp.toString().length();
+        writeData = datatemp.toString() + "\n";
+        file.write(writeData.toLatin1());
+        writeData.clear();
 
         indextemp = modessl->index(curRow, 8);
         datatemp = modessl->data(indextemp);
         strcpy(content->beatCnt, datatemp.toString().toLatin1().data());
         content->beatCntLen = datatemp.toString().length();
+        writeData = datatemp.toString() + "\n";
+        file.write(writeData.toLatin1());
+        writeData.clear();
 
         indextemp = modessl->index(curRow, 9);
         datatemp = modessl->data(indextemp);
         strcpy(content->mediaPort, datatemp.toString().toLatin1().data());
         content->mediaPortLen = datatemp.toString().length();
+        writeData = datatemp.toString() + "\n";
+        file.write(writeData.toLatin1());
+        writeData.clear();
 
         indextemp = modessl->index(curRow, 10);
         datatemp = modessl->data(indextemp);
@@ -540,10 +636,15 @@ void AWGBCheckTool::deviceRegister()
             strcpy(content->passwd, datatemp.toString().toLatin1().data());
             content->passwdLen = datatemp.toString().length();
         }
+        writeData = datatemp.toString() + "\n";
+        file.write(writeData.toLatin1());
+        writeData.clear();
+        file.close();
         cout << "copy ok" << endl;
         char buf[1024] = {0};
         int ret = 0;
         makeDeviceInfoXml(content, buf, false);
+
         ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)buf, strlen(buf));
         if(!ret)
         {
@@ -1177,7 +1278,7 @@ void AWGBCheckTool::recordPlay()
     root.appendChild(deviceId);
 
     QDomElement devicePort = doc.createElement("SipCmd");
-    QDomText devicePortText = doc.createTextNode("Invite");//标识是录像的invite
+    QDomText devicePortText = doc.createTextNode("InvitePlayback");//标识是录像的invite
     devicePort.appendChild(devicePortText);
     root.appendChild(devicePort);
 
@@ -1209,7 +1310,8 @@ void AWGBCheckTool::recordPlay()
     getThread->setMethod(ui.comboBox_2->currentText());
     if(!ret)
         qInfo() << "send record play invite to backend";
-    isRecordPlay = true;
+    if(!isRecordDownload)
+        isRecordPlay = true;
 }
 
 void AWGBCheckTool::recordStop()
@@ -1230,12 +1332,12 @@ void AWGBCheckTool::subscribe()
     root.appendChild(cmdType);
 
     QDomElement sipCmd = doc.createElement("SipCmd");
-    QDomText sipCmdText = doc.createTextNode("Subscribe");
+    QDomText sipCmdText = doc.createTextNode("Subscribe_Catalog");
     sipCmd.appendChild(sipCmdText);
     root.appendChild(sipCmd);
 
     QDomElement deviceId = doc.createElement("DeviceId");
-    QDomText deviceIdText = doc.createTextNode(ui.treeView->currentIndex().parent().data().toString());
+    QDomText deviceIdText = doc.createTextNode(ui.treeView->currentIndex().parent().data().toString().isEmpty() ? ui.lineEdit->text() : ui.treeView->currentIndex().parent().data().toString());
     deviceId.appendChild(deviceIdText);
     root.appendChild(deviceId);
 
@@ -1259,12 +1361,12 @@ void AWGBCheckTool::unSubscribe()
     root.appendChild(cmdType);
 
     QDomElement sipCmd = doc.createElement("SipCmd");
-    QDomText sipCmdText = doc.createTextNode("UnSubscribe");
+    QDomText sipCmdText = doc.createTextNode("UnSubscribe_Catalog");
     sipCmd.appendChild(sipCmdText);
     root.appendChild(sipCmd);
 
     QDomElement deviceId = doc.createElement("DeviceId");
-    QDomText deviceIdText = doc.createTextNode(ui.treeView->currentIndex().parent().data().toString());
+    QDomText deviceIdText = doc.createTextNode(ui.treeView->currentIndex().parent().data().toString().isEmpty() ? ui.lineEdit->text() : ui.treeView->currentIndex().parent().data().toString());
     deviceId.appendChild(deviceIdText);
     root.appendChild(deviceId);
 
@@ -1273,4 +1375,204 @@ void AWGBCheckTool::unSubscribe()
     if(!ret)
         qInfo() << "send unSubscribe to backend";
     cout << doc.toString().toStdString() << endl;
+}
+
+void AWGBCheckTool::ptzCtl()
+{
+    QObject *object = QObject::sender();
+    QPushButton *button = qobject_cast<QPushButton *>(object);
+    QDomDocument doc;
+    QDomElement root=doc.createElement("Request");
+    doc.appendChild(root);
+
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("SipCmd");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+
+    QDomElement sipCmd = doc.createElement("SipCmd");
+    QDomText sipCmdText = doc.createTextNode("PTZ");
+    sipCmd.appendChild(sipCmdText);
+    root.appendChild(sipCmd);
+
+    QDomElement ptzMethod = doc.createElement("PTZMethod");
+    QDomText ptzMethodText;
+    if(button == ui.pushButton_32)
+    {
+        ptzMethodText = doc.createTextNode("Up");
+    }
+    else if(button == ui.pushButton_33)
+    {
+        ptzMethodText = doc.createTextNode("Left");
+    }
+    else if(button == ui.pushButton_34)
+    {
+        ptzMethodText = doc.createTextNode("Right");
+    }
+    else if(button == ui.pushButton_35)
+    {
+        ptzMethodText = doc.createTextNode("Down");
+    }
+    else if(button == ui.pushButton_26)
+    {
+        ptzMethodText = doc.createTextNode("Small");
+    }
+    else if(button == ui.pushButton_27)
+    {
+        ptzMethodText = doc.createTextNode("Large");
+    }
+    else if(button == ui.pushButton_28)
+    {
+        ptzMethodText = doc.createTextNode("StartREC");
+    }
+    else if(button == ui.pushButton_29)
+    {
+        ptzMethodText = doc.createTextNode("StopREC");
+    }
+    else if(button == ui.pushButton_30)
+    {
+        ptzMethodText = doc.createTextNode("StartGuard");
+    }
+    else if(button == ui.pushButton_31)
+    {
+        ptzMethodText = doc.createTextNode("StopGuard");
+    }
+    ptzMethod.appendChild(ptzMethodText);
+    root.appendChild(ptzMethod);
+
+    QDomElement deviceId = doc.createElement("DeviceId");
+    QDomText deviceIdText = doc.createTextNode(ui.treeView->currentIndex().parent().data().toString().isEmpty() ? ui.lineEdit->text() : ui.treeView->currentIndex().parent().data().toString());
+    deviceId.appendChild(deviceIdText);
+    root.appendChild(deviceId);
+
+    int ret;
+    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().size());
+    if(!ret)
+        qInfo() << "send PTZ to backend";
+    cout << doc.toString().toStdString() << endl;
+}
+
+void AWGBCheckTool::notify()
+{
+    QString status = "Notify_";
+    if(ui.pushButton_17->text().split("-")[1] == QString("ADD"))
+    {
+        ui.pushButton_17->setText("发送通知-OFF");
+        status += "ADD";
+    }
+    else if(ui.pushButton_17->text().split("-")[1] == QString("OFF"))
+    {
+        ui.pushButton_17->setText("发送通知-ON");
+        status += "OFF";
+    }
+    else if(ui.pushButton_17->text().split("-")[1] == QString("ON"))
+    {
+        ui.pushButton_17->setText("发送通知-UPDATE");
+        status += "ON";
+    }
+    else if(ui.pushButton_17->text().split("-")[1] == QString("UPDATE"))
+    {
+        ui.pushButton_17->setText("发送通知-DEL");
+        status += "UPDATE";
+    }
+    else {
+        ui.pushButton_17->setText("发送通知-ADD");
+        status += "DEL";
+    }
+    QDomDocument doc;
+    QDomElement root=doc.createElement("Request");
+    doc.appendChild(root);
+
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("SipCmd");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+
+    QDomElement sipCmd = doc.createElement("SipCmd");
+    QDomText sipCmdText = doc.createTextNode(status);
+    sipCmd.appendChild(sipCmdText);
+    root.appendChild(sipCmd);
+
+    QDomElement method = doc.createElement("Method");
+    QDomText methodText = doc.createTextNode("Catalog");
+    method.appendChild(methodText);
+    root.appendChild(method);
+
+
+    int ret;
+    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().size());
+    if(!ret)
+        qInfo() << "send Notify to backend";
+    cout << doc.toString().toStdString() << endl;
+}
+
+void AWGBCheckTool::unNotify()
+{
+    QDomDocument doc;
+    QDomElement root=doc.createElement("Request");
+    doc.appendChild(root);
+
+    QDomElement cmdType = doc.createElement("CmdType");
+    QDomText cmdTypeText = doc.createTextNode("SipCmd");
+    cmdType.appendChild(cmdTypeText);
+    root.appendChild(cmdType);
+
+    QDomElement sipCmd = doc.createElement("SipCmd");
+    QDomText sipCmdText = doc.createTextNode("UnNotify");
+    sipCmd.appendChild(sipCmdText);
+    root.appendChild(sipCmd);
+
+    QDomElement method = doc.createElement("Method");
+    QDomText methodText = doc.createTextNode("Catalog");
+    method.appendChild(methodText);
+    root.appendChild(method);
+
+    QDomElement deviceId = doc.createElement("DeviceId");
+    QDomText deviceIdText = doc.createTextNode(ui.lineEdit->text());
+    deviceId.appendChild(deviceIdText);
+    root.appendChild(deviceId);
+    int ret;
+    ret = AW_BSQueue_PutBuffer(handle, (unsigned char *)doc.toString().toStdString().c_str(), doc.toString().size());
+    if(!ret)
+        qInfo() << "send UnNotify to backend";
+    cout << doc.toString().toStdString() << endl;
+    ui.pushButton_17->setText("发送通知-ADD");
+}
+
+void AWGBCheckTool::recordDownload()
+{
+    //先检查是否选择录像文件，接流方式，拼接xml字符串
+    QString fileName = "";
+    if(fileName = QFileDialog::getExistingDirectory(this, "", "./"), fileName.size())
+    {
+
+        bool isGetInput;//QInputDialog 是否成功得到输入
+        QString text = QInputDialog::getText(NULL,"保存视频文件","输入要保存的文件名",QLineEdit::Normal,"",&isGetInput);
+        if(!isGetInput)
+        {
+            QString a = "请输入要保存的文件名";
+            QMessageBox::information(this, "information", a);
+            return;
+        }
+        else {
+            udpReceiver->channel->setRecordDownload();
+            fileName += ("/" + text + ".H264");
+            udpReceiver->channel->setFileName(fileName);
+            //设置videochannel，给后端发送xml，开始下载
+            isRecordDownload = true;
+//            connect(udpReceiver, &RtpReciever::downLoadOK, this, &AWGBCheckTool::downLoadOk);
+            recordPlay();
+        }
+    }
+    else {
+        QString a = "未选择路径";
+        QMessageBox::information(this, "information", a);
+        return;
+    }
+}
+
+void AWGBCheckTool::downLoadOk()
+{
+    QString a = "下载完成";
+    QMessageBox::information(this, "information", a);
 }

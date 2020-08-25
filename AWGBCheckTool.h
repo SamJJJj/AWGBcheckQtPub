@@ -136,6 +136,7 @@ private:
     QString *pushId;
     QProcess *pro;
     bool isRecordPlay;
+    bool isRecordDownload;
     int seq;
     int handle;
     void SetList(pGBStart_s);
@@ -173,4 +174,9 @@ private slots:
     void recordStop();
     void subscribe();
     void unSubscribe();
+    void ptzCtl();
+    void notify();
+    void unNotify();
+    void recordDownload();
+    void downLoadOk();
 };

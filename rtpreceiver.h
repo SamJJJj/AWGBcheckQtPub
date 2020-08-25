@@ -19,6 +19,8 @@ public:
     void stop(bool isWait = false);
     VideoChannel *channel;  //后面不应该是这种方式
     bool mIsStoped;
+signals:
+    void downLoadOK();
 protected:
     bool mIsThreadRunning;
     int port;

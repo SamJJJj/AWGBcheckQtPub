@@ -163,24 +163,26 @@ int AW_BSQueue_Init(int *QHandle,unsigned char *ConnectHost,unsigned int Connect
         return BS_STATUS_FAIL;
     }
 
-    if(bs_use(*QHandle, WriteTube) != BS_STATUS_OK)
+	if (WriteTube != NULL)
+	{
+		if (bs_use(*QHandle, WriteTube) != BS_STATUS_OK)
+		{
+			bs_disconnect(*QHandle);
+			return BS_STATUS_FAIL;
+		}
+	}
+
+    if (ReadTube != NULL)
     {
-        bs_disconnect(*QHandle);
-        return BS_STATUS_FAIL;
+        if (bs_watch(*QHandle, ReadTube) != BS_STATUS_OK)
+        {
+            bs_disconnect(*QHandle);
+            return BS_STATUS_FAIL;
+        }
     }
 
-    if(bs_watch(*QHandle,  ReadTube) != BS_STATUS_OK)
-    {
-        bs_disconnect(*QHandle);
-        return BS_STATUS_FAIL;
-    }
-
-    if(bs_ignore(*QHandle, "default") != BS_STATUS_OK)
-    {
-        bs_disconnect(*QHandle);
-        return BS_STATUS_FAIL;
-    }
-
+    bs_ignore(*QHandle, "default");
+    
     return BS_STATUS_OK;
 }
 

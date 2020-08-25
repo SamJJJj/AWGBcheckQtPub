@@ -55,17 +55,6 @@ void outputMessage(QtMsgType type, const QMessageLogContext &context, const QStr
     mutex.unlock();
 }
 
-//void test()
-//{
-//    QString s = "nIw8h7rwsAdxwCov09XFqwxWiGHVoRVEWRWECxxUgbtrVnry18ODkEVZg+pDMlqDwbADtezTYJl1DxluH0P47g==";
-//    QByteArray a = QByteArray::fromBase64(s.toLocal8Bit());
-//    for(int i = 0; i < a.length(); ++i)
-//    {
-//        printf("%x,",a.data()[i]);
-//    }
-//    printf("\n");
-//}
-
 int main(int argc, char *argv[])
 {
     qInstallMessageHandler(outputMessage);
